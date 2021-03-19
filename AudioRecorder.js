@@ -54,8 +54,8 @@ class AudioRecorder {
 				track.stop();
 			});
 		}
-		// if (this.trackedObjects.processor)
-		// 	this.trackedObjects.processor.disconnect();
+		if (this.trackedObjects.processor)
+			this.trackedObjects.processor.disconnect();
 	}
 
 
@@ -89,14 +89,16 @@ class AudioRecorder {
 		this.trackedObjects.stream = stream;
 	}
 	async startRecordings(stream) {
-		// console.log("Creating audioContext for stream with processor");
-		// const audioContext = new AudioContext();
-		// console.log("Creating source for stream");
-		// const source = audioContext.createMediaStreamSource(stream);
-		// console.log("Creating processor for stream");
-		// const processor = audioContext.createScriptProcessor(1024, 1, 1);
-		// console.log("Adding onaudioprocess event");
-		// processor.onaudioprocess = (e) => this.onAudioUpdate(e);
+		console.log("Creating new AudioContext class");
+		const AudioContext = window.AudioContext || window.webkitAudioContext; 
+		console.log("Creating audioContext for stream with processor");
+		const audioContext = new AudioContext();
+		console.log("Creating source for stream");
+		const source = audioContext.createMediaStreamSource(stream);
+		console.log("Creating processor for stream");
+		const processor = audioContext.createScriptProcessor(1024, 1, 1);
+		console.log("Adding onaudioprocess event");
+		processor.onaudioprocess = (e) => this.onAudioUpdate(e);
 	
 		/** @type{MediaRecorder} */
 		console.log("Awaiting MediaRecorder");
@@ -106,13 +108,13 @@ class AudioRecorder {
 		mediaRecorder.addEventListener("dataavailable", (e) => this.onDataAvailableRecorder(e));
 		mediaRecorder.addEventListener("stop", (e) => this.onStopMediaRecorder(e));
 
-		// console.log("Connecting Processor");
-		// source.connect(processor);
-		// processor.connect(audioContext.destination);
+		console.log("Connecting Processor");
+		source.connect(processor);
+		processor.connect(audioContext.destination);
 		console.log("Starting MediaRecorder");
 		mediaRecorder.start();
 		
-		// this.trackedObjects.processor = processor;
+		this.trackedObjects.processor = processor;
 		this.trackedObjects.mediaRecorder = mediaRecorder;
 
 		return true;
