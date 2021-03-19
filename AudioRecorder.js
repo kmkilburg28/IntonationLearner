@@ -35,10 +35,7 @@ class AudioRecorder {
 	}
 
 	async start() {
-		console.log("Requesting Stream");
 		await this.requestStream();
-		console.log("Tracked Objects", this.trackedObjects);
-		console.log("Got stream", this.trackedObjects.stream);
 		if (this.trackedObjects.stream) {
 			let startRecording = await this.startRecordings(this.trackedObjects.stream);
 			if (startRecording)
@@ -77,7 +74,6 @@ class AudioRecorder {
 				audio: true,
 				video: false,
 			});
-			console.log(stream.getTracks());
 		}
 		catch (e) {
 			console.error(e + " – Could not access audio input.");
@@ -114,8 +110,6 @@ class AudioRecorder {
 	 * @param {AudioProcessingEvent} e 
 	 */
 	async onAudioUpdate(e) {
-		console.log("onAudioUpdate!!!");
-		console.log(e);
 		let audioBuffer = e.inputBuffer;
 		let audioChannel = new Float32Array(new Array(audioBuffer.length));
 		// audioBuffer.copyFromChannel(audioChannel, 0);
@@ -129,11 +123,9 @@ class AudioRecorder {
 	}
 
 	async onDataAvailableRecorder(e) {
-		console.log("onDataAvailableRecorder!!!");
 		this.audioBlobs.push(e.data); // push audio Blob
 	}
 	async onStopMediaRecorder(e) {
-		console.log("onStopMediaRecorder!!!");
 		const audioBlob = new Blob(this.audioBlobs);
 		if (this.callbacks.onAudioStop)
 			this.callbacks.onAudioStop(audioBlob);

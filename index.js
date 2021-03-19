@@ -5,15 +5,16 @@ async function audioChange(e) {
 		audioControl.audioRecorder.stop();
 	}
 	else {
-		console.log("Creating AudioRecorder!");
+		let audioReplay = document.getElementById('audioReplay');
+		audioReplay.addEventListener('click', (e) => {
+			if (e.target.audio)
+				e.target.audio.play();
+		});
 		const audioRecorder = new AudioRecorder({
 			onAudioStart: () => {
-				console.log("onAudioStart");
 				audioControl.textContent = "Stop";
 			},
 			onAudioUpdate: (audioData) => {
-				console.log("onAudioUpdate");
-				console.log(audioData);
 				let labelInd = parseInt(chart.data.labels[chart.data.labels.length - 1]);
 				chart.data.datasets.forEach((dataset) => { dataset.data = []; });
 				for (let i = 0; i < 200; ++i) {
@@ -22,18 +23,16 @@ async function audioChange(e) {
 						dataset.data.push(audioData[i]);
 					});
 				}
-				console.log("Update Chart");
 				chart.update();
 			},
 			onAudioStop: (audioBlob) => {
-				console.log("onAudioStop");
-				console.log(audioBlob);
 				audioControl.textContent = "Start";
 				const audioUrl = URL.createObjectURL(audioBlob);
 				const Audio = window.Audio || window.webkitAudio;
 				const audio = new Audio(audioUrl);
-				console.log(audio);
-				audio.play();
+
+				audioReplay.audio = audio;
+				audioReplay.disabled = false;
 			},
 			onPermissionsFail: () => {
 				let childNodes = audioControl.parentNode.childNodes;
