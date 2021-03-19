@@ -60,8 +60,6 @@ class AudioRecorder {
 
 	async requestStream() {
 		if (this.trackedObjects.stream) return;
-
-		console.log("Checking Stored Permissions");
 		
 		// let microphonePermissions = await navigator.permissions.query({name:'microphone'});
 		// if (microphonePermissions.state == 'denied') {
@@ -70,8 +68,6 @@ class AudioRecorder {
 		// 		this.callbacks.onPermissionsFail();
 		// 	return;
 		// }
-
-		console.log("Requesting Permission");
 	
 		// Request audio stream
 		let stream 
@@ -88,8 +84,6 @@ class AudioRecorder {
 				this.callbacks.onPermissionsFail();
 			return;
 		}
-		console.log("Permission received with stream");
-		console.log("Stream received: ", stream);
 
 		this.trackedObjects.stream = stream;
 	}

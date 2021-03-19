@@ -3,7 +3,6 @@ async function audioChange(e) {
 	let chart = audioControl.chart;
 	if (audioControl.textContent === "Stop") {
 		audioControl.audioRecorder.stop();
-		audioControl.textContent = "Start";
 	}
 	else {
 		console.log("Creating AudioRecorder!");
@@ -12,6 +11,8 @@ async function audioChange(e) {
 				audioControl.textContent = "Stop";
 			},
 			onAudioUpdate: (audioData) => {
+				console.log("onAudioUpdate");
+				console.log(audioData);
 				let labelInd = parseInt(chart.data.labels[chart.data.labels.length - 1]);
 				chart.data.datasets.forEach((dataset) => { dataset.data = []; });
 				for (let i = 0; i < 200; ++i) {
@@ -23,6 +24,9 @@ async function audioChange(e) {
 				chart.update();
 			},
 			onAudioStop: (audioBlob) => {
+				console.log("onAudioStop");
+				console.log(audioBlob);
+				audioControl.textContent = "Start";
 				const audioUrl = URL.createObjectURL(audioBlob);
 				const audio = new Audio(audioUrl);
 				console.log(audio);
