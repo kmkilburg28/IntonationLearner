@@ -88,18 +88,24 @@ class AudioRecorder {
 		this.trackedObjects.stream = stream;
 	}
 	async startRecordings(stream) {
+		console.log("Creating auioContext for stream with processor");
 		const audioContext = new AudioContext();
 		const source = audioContext.createMediaStreamSource(stream);
 		const processor = audioContext.createScriptProcessor(1024, 1, 1);
 		processor.onaudioprocess = (e) => this.onAudioUpdate(e);
 	
 		/** @type{MediaRecorder} */
+		console.log("Awaiting MediaRecorder");
 		const mediaRecorder = await new MediaRecorder(stream);			
+		console.log("MediaRecorder:");
+		console.log(mediaRecorder);
 		mediaRecorder.addEventListener("dataavailable", (e) => this.onDataAvailableRecorder(e));
 		mediaRecorder.addEventListener("stop", (e) => this.onStopMediaRecorder(e));
-		
+
+		console.log("Connecting Processor");
 		source.connect(processor);
 		processor.connect(audioContext.destination);
+		console.log("Starting MediaRecorder");
 		mediaRecorder.start();
 		
 		this.trackedObjects.processor = processor;
@@ -112,6 +118,8 @@ class AudioRecorder {
 	 * @param {AudioProcessingEvent} e 
 	 */
 	async onAudioUpdate(e) {
+		console.log("onAudioUpdate!!!");
+		console.log(e);
 		let audioBuffer = e.inputBuffer;
 		let audioChannel = new Float32Array(new Array(audioBuffer.length));
 		audioBuffer.copyFromChannel(audioChannel, 0);
@@ -120,9 +128,11 @@ class AudioRecorder {
 	}
 
 	async onDataAvailableRecorder(e) {
+		console.log("onDataAvailableRecorder!!!");
 		this.audioBlobs.push(e.data); // push audio Blob
 	}
 	async onStopMediaRecorder(e) {
+		console.log("onStopMediaRecorder!!!");
 		const audioBlob = new Blob(this.audioBlobs);
 		if (this.callbacks.onAudioStop)
 			this.callbacks.onAudioStop(audioBlob);
