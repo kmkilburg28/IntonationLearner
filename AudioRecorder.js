@@ -89,29 +89,19 @@ class AudioRecorder {
 		this.trackedObjects.stream = stream;
 	}
 	async startRecordings(stream) {
-		console.log("Creating new AudioContext class");
 		const AudioContext = window.AudioContext || window.webkitAudioContext; 
-		console.log("Creating audioContext for stream with processor");
 		const audioContext = new AudioContext();
-		console.log("Creating source for stream");
 		const source = audioContext.createMediaStreamSource(stream);
-		console.log("Creating processor for stream");
 		const processor = audioContext.createScriptProcessor(1024, 1, 1);
-		console.log("Adding onaudioprocess event");
 		processor.onaudioprocess = (e) => this.onAudioUpdate(e);
 	
 		/** @type{MediaRecorder} */
-		console.log("Awaiting MediaRecorder");
 		const mediaRecorder = await new MediaRecorder(stream);			
-		console.log("MediaRecorder:");
-		console.log(mediaRecorder);
 		mediaRecorder.addEventListener("dataavailable", (e) => this.onDataAvailableRecorder(e));
 		mediaRecorder.addEventListener("stop", (e) => this.onStopMediaRecorder(e));
 
-		console.log("Connecting Processor");
 		source.connect(processor);
 		processor.connect(audioContext.destination);
-		console.log("Starting MediaRecorder");
 		mediaRecorder.start();
 		
 		this.trackedObjects.processor = processor;
@@ -128,7 +118,11 @@ class AudioRecorder {
 		console.log(e);
 		let audioBuffer = e.inputBuffer;
 		let audioChannel = new Float32Array(new Array(audioBuffer.length));
+		console.log("Grab audio channel");
+		console.log(audioChannel);
 		audioBuffer.copyFromChannel(audioChannel, 0);
+		console.log("Audio Channel copied");
+		console.log(audioChannel);
 		if (this.callbacks.onAudioUpdate)
 			this.callbacks.onAudioUpdate(audioChannel);
 	}

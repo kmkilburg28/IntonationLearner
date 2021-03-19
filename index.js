@@ -22,6 +22,7 @@ async function audioChange(e) {
 						dataset.data.push(audioData[i]);
 					});
 				}
+				console.log("Update Chart");
 				chart.update();
 			},
 			onAudioStop: (audioBlob) => {
