@@ -8,6 +8,7 @@ async function audioChange(e) {
 		console.log("Creating AudioRecorder!");
 		const audioRecorder = new AudioRecorder({
 			onAudioStart: () => {
+				console.log("onAudioStart");
 				audioControl.textContent = "Stop";
 			},
 			onAudioUpdate: (audioData) => {
