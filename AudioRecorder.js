@@ -117,9 +117,9 @@ class AudioRecorder {
 		console.log("onAudioUpdate!!!");
 		console.log(e);
 		let audioBuffer = e.inputBuffer;
+		console.log("Audiobuffer: ", audioBuffer);
 		let audioChannel = new Float32Array(new Array(audioBuffer.length));
 		console.log("Grab audio channel");
-		console.log(audioChannel);
 		audioBuffer.copyFromChannel(audioChannel, 0);
 		console.log("Audio Channel copied");
 		console.log(audioChannel);
