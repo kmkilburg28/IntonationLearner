@@ -63,13 +63,13 @@ class AudioRecorder {
 
 		console.log("Checking Stored Permissions");
 		
-		let microphonePermissions = await navigator.permissions.query({name:'microphone'});
-		if (microphonePermissions.state == 'denied') {
-			console.error("Blocked from accessing audio input. Please consider changing microphone permissions.");
-			if (this.callbacks.onPermissionsFail)
-				this.callbacks.onPermissionsFail();
-			return;
-		}
+		// let microphonePermissions = await navigator.permissions.query({name:'microphone'});
+		// if (microphonePermissions.state == 'denied') {
+		// 	console.error("Blocked from accessing audio input. Please consider changing microphone permissions.");
+		// 	if (this.callbacks.onPermissionsFail)
+		// 		this.callbacks.onPermissionsFail();
+		// 	return;
+		// }
 
 		console.log("Requesting Permission");
 	
