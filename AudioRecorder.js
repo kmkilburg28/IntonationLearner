@@ -63,7 +63,7 @@ class AudioRecorder {
 
 		console.log("Checking Stored Permissions");
 		
-		let microphonePermissions = navigator.permissions.query({name:'microphone'});
+		let microphonePermissions = await navigator.permissions.query({name:'microphone'});
 		if (microphonePermissions.state == 'denied') {
 			console.error("Blocked from accessing audio input. Please consider changing microphone permissions.");
 			if (this.callbacks.onPermissionsFail)
