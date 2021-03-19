@@ -6,10 +6,6 @@ async function audioChange(e) {
 	}
 	else {
 		let audioReplay = document.getElementById('audioReplay');
-		audioReplay.addEventListener('click', (e) => {
-			if (e.target.audio)
-				e.target.audio.play();
-		});
 		const audioRecorder = new AudioRecorder({
 			onAudioStart: () => {
 				audioControl.textContent = "Stop";
