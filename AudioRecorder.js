@@ -40,7 +40,7 @@ class AudioRecorder {
 		console.log("Tracked Objects", this.trackedObjects);
 		console.log("Got stream", this.trackedObjects.stream);
 		if (this.trackedObjects.stream) {
-			let startRecording = this.startRecordings(this.trackedObjects.stream);
+			let startRecording = await this.startRecordings(this.trackedObjects.stream);
 			if (startRecording)
 				this.callbacks.onAudioStart();
 		}
