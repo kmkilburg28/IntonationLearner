@@ -6,6 +6,7 @@ async function audioChange(e) {
 		audioControl.textContent = "Start";
 	}
 	else {
+		console.log("Creating AudioRecorder!");
 		const audioRecorder = new AudioRecorder({
 			onAudioStart: () => {
 				audioControl.textContent = "Stop";
