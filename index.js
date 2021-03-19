@@ -30,6 +30,7 @@ async function audioChange(e) {
 				console.log(audioBlob);
 				audioControl.textContent = "Start";
 				const audioUrl = URL.createObjectURL(audioBlob);
+				const Audio = window.Audio || window.webkitAudio;
 				const audio = new Audio(audioUrl);
 				console.log(audio);
 				audio.play();
