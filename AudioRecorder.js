@@ -89,10 +89,13 @@ class AudioRecorder {
 		this.trackedObjects.stream = stream;
 	}
 	async startRecordings(stream) {
-		console.log("Creating auioContext for stream with processor");
+		console.log("Creating audioContext for stream with processor");
 		const audioContext = new AudioContext();
+		console.log("Creating source for stream");
 		const source = audioContext.createMediaStreamSource(stream);
+		console.log("Creating processor for stream");
 		const processor = audioContext.createScriptProcessor(1024, 1, 1);
+		console.log("Adding onaudioprocess event");
 		processor.onaudioprocess = (e) => this.onAudioUpdate(e);
 	
 		/** @type{MediaRecorder} */
