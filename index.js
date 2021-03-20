@@ -7,10 +7,10 @@ async function audioChange(e) {
 	else {
 		let audioReplay = document.getElementById('audioReplay');
 		let audioReplaySound = document.getElementById('audioReplaySound');
-		let lastSource = undefined;
 		audioReplay.addEventListener('click', (e) => {
 			audioReplaySound.play();
 		});
+		// let lastSource = undefined;
 		// audioReplay.addEventListener('click', async (e) => {
 		// 	if (e.target.playing) {
 		// 		console.log("Stopping source");
@@ -43,15 +43,23 @@ async function audioChange(e) {
 			onAudioStop: (audioBlob) => {
 				audioControl.textContent = "Start";
 
-				const audioUrl = URL.createObjectURL(audioBlob);
+				let audioUrl;
+				try {
+					audioUrl = webkitURL.createObjectURL(audioBlob);
+				}
+				catch(err) { // Firefox
+					audioUrl = URL.createObjectURL(audioBlob);
+				}
+
 				audioReplaySound.src = audioUrl;
+				// console.log(audioReplay.parentNode.childNodes);
 				audioReplay.disabled = false;
 				// const Audio = window.Audio || window.webkitAudio;
 				// const audio = new Audio(audioUrl);
 
 				// console.log(audio);
-				// audioControl.parentNode.appendChild(audio);
-				console.log(audioControl.parentNode.childNodes);
+				// audioReplay.parentNode.appendChild(audio);
+				// console.log(audioReplay.parentNode.childNodes);
 				
 				// // audioReplay.audio = audio;
 				// audioReplay.disabled = false;
