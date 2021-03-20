@@ -8,47 +8,13 @@ async function audioChange(e) {
 		let audioReplay = document.getElementById('audioReplay');
 		let lastSource = undefined;
 		audioReplay.addEventListener('click', async (e) => {
-			if (lastSource) {
+			if (e.target.playing) {
 				lastSource.stop();
+				e.target.playing = false;
 				lastSource = undefined;
 			}
-			if (e.target.audioBlob) {
-				console.log("Attempting to replay!!");
-				let fileReader = new FileReader();
-				// let arrayBuffer = await e.target.audioBlob.arrayBuffer();
-				const AudioContext = window.AudioContext || window.webkitAudioContext; 
-				/** @type {AudioContext} */
-				const audioContext = new AudioContext();
-				console.log("audioContext:", audioContext);
-				
-				fileReader.onloadend = () => {
-					let arrayBuffer = fileReader.result;
-					console.log("arrayBuffer:", arrayBuffer);
-					audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
-
-						console.log("audioBuffer:", audioBuffer);
-						
-						let source = audioContext.createBufferSource();
-						source.buffer = audioBuffer;
-						if (!source.start)
-							source.start = source.noteOn;
-						
-						var gainNode = audioContext.createGain()
-						gainNode.gain.value = 1
-						source.connect(gainNode)
-						gainNode.connect(audioContext.destination)
-						
-						lastSource = source;
-						console.log("Start source");
-						audioContext.resume();
-						source.start(0);
-						console.log("Source Started");
-					}, (e) => {
-						console.error("Error Decoding Audio: ", e);
-					});
-				}
-				fileReader.readAsArrayBuffer(e.target.audioBlob);
-			}
+			e.target.audioSource.start(0);
+			e.target.playing = true;
 		});
 		const audioRecorder = new AudioRecorder({
 			onAudioStart: () => {
@@ -73,8 +39,47 @@ async function audioChange(e) {
 				// const audio = new Audio(audioUrl);
 				
 				// audioReplay.audio = audio;
-				audioReplay.audioBlob = audioBlob;
 				audioReplay.disabled = false;
+
+				let fileReader = new FileReader();
+				// let arrayBuffer = await e.target.audioBlob.arrayBuffer();
+				const AudioContext = window.AudioContext || window.webkitAudioContext; 
+				/** @type {AudioContext} */
+				const audioContext = new AudioContext();
+				console.log("audioContext:", audioContext);
+				
+				fileReader.onloadend = () => {
+					let arrayBuffer = fileReader.result;
+					console.log("arrayBuffer:", arrayBuffer);
+					audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+
+						console.log("audioBuffer:", audioBuffer);
+						
+						let source = audioContext.createBufferSource();
+						source.buffer = audioBuffer;
+						if (!source.start)
+							source.start = source.noteOn;
+						
+						var gainNode = audioContext.createGain();
+						gainNode.gain.value = 1;
+						source.connect(gainNode);
+						gainNode.connect(audioContext.destination);
+						
+						lastSource = source;
+						console.log("Start source");
+						// audioContext.resume();
+						// source.start(0);
+						console.log("Source Started");
+
+						audioControl.audioSource = source;
+						source.onended = () => {
+							audioControl.playing = false;
+						};
+					}, (e) => {
+						console.error("Error Decoding Audio: ", e);
+					});
+				}
+				fileReader.readAsArrayBuffer(audioBlob);
 			},
 			onPermissionsFail: () => {
 				let childNodes = audioControl.parentNode.childNodes;
