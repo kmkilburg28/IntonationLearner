@@ -9,11 +9,13 @@ async function audioChange(e) {
 		let lastSource = undefined;
 		audioReplay.addEventListener('click', async (e) => {
 			if (e.target.playing) {
+				console.log("Stopping source");
 				lastSource.stop();
 				e.target.playing = false;
 				lastSource = undefined;
 			}
 			if (e.target.audioSource) {
+				console.log("Playing source");
 				e.target.audioSource.start(0);
 				e.target.playing = true;
 			}
@@ -68,10 +70,6 @@ async function audioChange(e) {
 						gainNode.connect(audioContext.destination);
 						
 						lastSource = source;
-						console.log("Start source");
-						// audioContext.resume();
-						// source.start(0);
-						console.log("Source Started");
 
 						audioReplay.audioSource = source;
 						source.onended = () => {
