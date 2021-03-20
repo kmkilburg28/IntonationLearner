@@ -13,6 +13,7 @@ async function audioChange(e) {
 				lastSource = undefined;
 			}
 			if (e.target.audioBlob) {
+				console.log("IM TRYING ALRIGHT!");
 				e.target.audioBlob.arrayBuffer().then((arrayBuffer) => {
 					const AudioContext = window.AudioContext || window.webkitAudioContext; 
 					/** @type {AudioContext} */
