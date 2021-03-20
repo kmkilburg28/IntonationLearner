@@ -6,6 +6,34 @@ async function audioChange(e) {
 	}
 	else {
 		let audioReplay = document.getElementById('audioReplay');
+		let lastSource = undefined;
+		audioReplay.addEventListener('click', (e) => {
+			if (lastSource) {
+				lastSource.stop();
+				lastSource = undefined;
+			}
+			if (e.target.audioBlob) {
+				e.target.audioBlob.arrayBuffer().then((arrayBuffer) => {
+					const AudioContext = window.AudioContext || window.webkitAudioContext; 
+					/** @type {AudioContext} */
+					let audioContext = new AudioContext();
+					audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+						let source = audioContext.createBufferSource();
+						source.buffer = audioBuffer;
+						// if (!source.start)
+						// 	source.start = source.noteOn;
+						
+						var gainNode = audioContext.createGain()
+						gainNode.gain.value = 1
+						source.connect(gainNode)
+						gainNode.connect(audioContext.destination)
+						
+						lastSource = source;
+						source.start(0);
+					});
+				});
+			}
+		});
 		const audioRecorder = new AudioRecorder({
 			onAudioStart: () => {
 				audioControl.textContent = "Stop";
@@ -23,11 +51,13 @@ async function audioChange(e) {
 			},
 			onAudioStop: (audioBlob) => {
 				audioControl.textContent = "Start";
-				const audioUrl = URL.createObjectURL(audioBlob);
-				const Audio = window.Audio || window.webkitAudio;
-				const audio = new Audio(audioUrl);
 
-				audioReplay.audio = audio;
+				// const audioUrl = URL.createObjectURL(audioBlob);
+				// const Audio = window.Audio || window.webkitAudio;
+				// const audio = new Audio(audioUrl);
+				
+				// audioReplay.audio = audio;
+				audioReplay.audioBlob = audioBlob;
 				audioReplay.disabled = false;
 			},
 			onPermissionsFail: () => {
