@@ -13,30 +13,35 @@ async function audioChange(e) {
 				lastSource = undefined;
 			}
 			if (e.target.audioBlob) {
-				console.log("Attempting to replay");
-				let arrayBuffer = await e.target.audioBlob.arrayBuffer();
-				console.log("arrayBuffer:", arrayBuffer);
-				const AudioContext = window.AudioContext || window.webkitAudioContext; 
-				/** @type {AudioContext} */
-				let audioContext = new AudioContext();
-				console.log("audioContext:", audioContext);
-				let audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-				console.log("audioBuffer:", audioBuffer);
-				
-				let source = audioContext.createBufferSource();
-				source.buffer = audioBuffer;
-				if (!source.start)
-					source.start = source.noteOn;
-				
-				var gainNode = audioContext.createGain()
-				gainNode.gain.value = 1
-				source.connect(gainNode)
-				gainNode.connect(audioContext.destination)
-				
-				lastSource = source;
-				console.log("Start source");
-				source.start(0);
-				console.log("Source Started");
+				console.log("Attempting to replay!!!");
+				let fileReader = new FileReader();
+				// let arrayBuffer = await e.target.audioBlob.arrayBuffer();
+				fileReader.onloadend = async () => {
+					let arrayBuffer = fileReader.result;
+					console.log("arrayBuffer:", arrayBuffer);
+					const AudioContext = window.AudioContext || window.webkitAudioContext; 
+					/** @type {AudioContext} */
+					let audioContext = new AudioContext();
+					console.log("audioContext:", audioContext);
+					let audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+					console.log("audioBuffer:", audioBuffer);
+					
+					let source = audioContext.createBufferSource();
+					source.buffer = audioBuffer;
+					if (!source.start)
+						source.start = source.noteOn;
+					
+					var gainNode = audioContext.createGain()
+					gainNode.gain.value = 1
+					source.connect(gainNode)
+					gainNode.connect(audioContext.destination)
+					
+					lastSource = source;
+					console.log("Start source");
+					source.start(0);
+					console.log("Source Started");
+				}
+				fileReader.readAsArrayBuffer(e.target.audioBlob);
 			}
 		});
 		const audioRecorder = new AudioRecorder({
