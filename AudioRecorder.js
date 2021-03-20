@@ -126,7 +126,7 @@ class AudioRecorder {
 		this.audioBlobs.push(e.data); // push audio Blob
 	}
 	async onStopMediaRecorder(e) {
-		const audioBlob = new Blob(this.audioBlobs);
+		const audioBlob = new Blob(this.audioBlobs, { type : 'audio/wav; codecs=0' });
 		if (this.callbacks.onAudioStop)
 			this.callbacks.onAudioStop(audioBlob);
 	}
