@@ -54,7 +54,7 @@ async function audioChange(e) {
 
 				audioReplaySound.src = audioUrl;
 				// console.log(audioReplay.parentNode.childNodes);
-				// audioReplay.disabled = false;
+				audioReplay.disabled = false;
 				// audioReplaySound.play();
 				// const Audio = window.Audio || window.webkitAudio;
 				// const audio = new Audio(audioUrl);
