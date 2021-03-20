@@ -15,7 +15,7 @@ function unlock() {
 	source.connect(audioContext.destination);
 	if (source.start)
 		source.start(0);
-	else if (source.noteOn)
+	else if (source.noteOn) // mobile
 		source.noteOn(0);
 
 	// by checking the play state after some time, we know if we're really unlocked
@@ -67,8 +67,8 @@ async function audioChange(e) {
 						
 						let source = audioContext.createBufferSource();
 						source.buffer = audioBuffer;
-						if (!source.start)
-							source.start = source.noteOn;
+						// if (!source.start)
+						// 	source.start = source.noteOn;
 						
 						var gainNode = audioContext.createGain();
 						gainNode.gain.value = 1;
@@ -92,7 +92,10 @@ async function audioChange(e) {
 
 						console.log("Playing source");
 						console.log(source.buffer.getChannelData(0));
-						source.start();
+						if (source.start)
+							source.start(0);
+						else if (source.noteOn) // mobile
+							source.noteOn(0);
 						console.log("Started source");
 						e.target.playing = true;
 						lastSource = source;
