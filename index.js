@@ -13,8 +13,10 @@ async function audioChange(e) {
 				e.target.playing = false;
 				lastSource = undefined;
 			}
-			e.target.audioSource.start(0);
-			e.target.playing = true;
+			if (e.target.audioSource) {
+				e.target.audioSource.start(0);
+				e.target.playing = true;
+			}
 		});
 		const audioRecorder = new AudioRecorder({
 			onAudioStart: () => {
@@ -71,9 +73,9 @@ async function audioChange(e) {
 						// source.start(0);
 						console.log("Source Started");
 
-						audioControl.audioSource = source;
+						audioReplay.audioSource = source;
 						source.onended = () => {
-							audioControl.playing = false;
+							audioReplay.playing = false;
 						};
 					}, (e) => {
 						console.error("Error Decoding Audio: ", e);
