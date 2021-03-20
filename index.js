@@ -18,12 +18,59 @@ async function audioChange(e) {
 				e.target.playing = false;
 				lastSource = undefined;
 			}
-			if (e.target.audioSource) {
-				console.log("Playing source");
-				e.target.audioSource.start(0);
-				console.log("Started source");
-				e.target.playing = true;
-				lastSource = e.target.audioSorce;
+			if (e.target.audioBlob) {
+				let fileReader = new FileReader();
+				// let arrayBuffer = await e.target.audioBlob.arrayBuffer();
+				const AudioContext = window.AudioContext || window.webkitAudioContext; 
+				/** @type {AudioContext} */
+				const audioContext = new AudioContext();
+				console.log("audioContext:", audioContext);
+				
+				fileReader.onloadend = () => {
+					let arrayBuffer = fileReader.result;
+					console.log("arrayBuffer:", arrayBuffer);
+					audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+
+						console.log("audioBuffer:", audioBuffer);
+						
+						let source = audioContext.createBufferSource();
+						source.buffer = audioBuffer;
+						if (!source.start)
+							source.start = source.noteOn;
+						
+						var gainNode = audioContext.createGain();
+						gainNode.gain.value = 1;
+						source.connect(gainNode);
+						gainNode.connect(audioContext.destination);
+						console.log("Destination: ", audioContext.destination);
+						console.log("channelCount: ", audioContext.destination.channelCount);
+						console.log("channelCountMode: ", audioContext.destination.channelCountMode);
+						console.log("channelInterpretation: ", audioContext.destination.channelInterpretation);
+						console.log("maxChannelCount: ", audioContext.destination.maxChannelCount);
+						console.log("numberOfInputs: ", audioContext.destination.numberOfInputs);
+						console.log("numberOfOutputs: ", audioContext.destination.numberOfOutputs);
+						
+						// source.buffer.getChannelData(0);
+
+						audioReplay.audioSource = source;
+						source.onended = () => {
+							console.log("Stopping source2");
+							audioReplay.playing = false;
+						};
+
+						console.log("Playing source");
+						console.log(e.target.audioSource.buffer.getChannelData(0));
+						e.target.audioSource.start(0);
+						console.log("Started source");
+						e.target.playing = true;
+						lastSource = e.target.audioSorce;
+					}, (e) => {
+						console.error("Error Decoding Audio: ", e);
+					});
+				}
+				fileReader.readAsArrayBuffer(e.target.audioBlob);
+
+				
 			}
 		});
 		const audioRecorder = new AudioRecorder({
@@ -70,43 +117,9 @@ async function audioChange(e) {
 				
 				// // audioReplay.audio = audio;
 				// audioReplay.disabled = false;
+				audioReplay.audioBlob = audioBlob;
 
-				let fileReader = new FileReader();
-				// let arrayBuffer = await e.target.audioBlob.arrayBuffer();
-				const AudioContext = window.AudioContext || window.webkitAudioContext; 
-				/** @type {AudioContext} */
-				const audioContext = new AudioContext();
-				console.log("audioContext:", audioContext);
 				
-				fileReader.onloadend = () => {
-					let arrayBuffer = fileReader.result;
-					console.log("arrayBuffer:", arrayBuffer);
-					audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
-
-						console.log("audioBuffer:", audioBuffer);
-						
-						let source = audioContext.createBufferSource();
-						source.buffer = audioBuffer;
-						if (!source.start)
-							source.start = source.noteOn;
-						
-						var gainNode = audioContext.createGain();
-						gainNode.gain.value = 1;
-						source.connect(gainNode);
-						gainNode.connect(audioContext.destination);
-						
-						lastSource = source;
-
-						audioReplay.audioSource = source;
-						source.onended = () => {
-							console.log("Stopping source2");
-							audioReplay.playing = false;
-						};
-					}, (e) => {
-						console.error("Error Decoding Audio: ", e);
-					});
-				}
-				fileReader.readAsArrayBuffer(audioBlob);
 			},
 			onPermissionsFail: () => {
 				let childNodes = audioControl.parentNode.childNodes;
