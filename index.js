@@ -50,12 +50,15 @@ async function audioChange(e) {
 				catch(err) { // Firefox
 					audioUrl = URL.createObjectURL(audioBlob);
 				}
+				console.log(audioUrl);
 
 				audioReplaySound.src = audioUrl;
 				// console.log(audioReplay.parentNode.childNodes);
 				audioReplay.disabled = false;
-				// const Audio = window.Audio || window.webkitAudio;
-				// const audio = new Audio(audioUrl);
+				audioReplaySound.play();
+				const Audio = window.Audio || window.webkitAudio;
+				const audio = new Audio(audioUrl);
+				audio.play();
 
 				// console.log(audio);
 				// audioReplay.parentNode.appendChild(audio);
