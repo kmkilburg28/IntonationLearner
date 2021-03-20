@@ -6,20 +6,25 @@ async function audioChange(e) {
 	}
 	else {
 		let audioReplay = document.getElementById('audioReplay');
+		let audioReplaySound = document.getElementById('audioReplaySound');
 		let lastSource = undefined;
-		audioReplay.addEventListener('click', async (e) => {
-			if (e.target.playing) {
-				console.log("Stopping source");
-				lastSource.stop();
-				e.target.playing = false;
-				lastSource = undefined;
-			}
-			if (e.target.audioSource) {
-				console.log("Playing source");
-				e.target.audioSource.start(0);
-				e.target.playing = true;
-			}
+		audioReplay.addEventListener('click', (e) => {
+			audioReplaySound.play();
 		});
+		// audioReplay.addEventListener('click', async (e) => {
+		// 	if (e.target.playing) {
+		// 		console.log("Stopping source");
+		// 		lastSource.stop();
+		// 		e.target.playing = false;
+		// 		lastSource = undefined;
+		// 	}
+		// 	if (e.target.audioSource) {
+		// 		console.log("Playing source");
+		// 		e.target.audioSource.start(0);
+		// 		e.target.playing = true;
+		// 		lastSource = e.target.audioSorce;
+		// 	}
+		// });
 		const audioRecorder = new AudioRecorder({
 			onAudioStart: () => {
 				audioControl.textContent = "Stop";
@@ -38,48 +43,54 @@ async function audioChange(e) {
 			onAudioStop: (audioBlob) => {
 				audioControl.textContent = "Start";
 
-				// const audioUrl = URL.createObjectURL(audioBlob);
+				const audioUrl = URL.createObjectURL(audioBlob);
+				audioReplaySound.src = audioUrl;
+				audioReplay.disabled = false;
 				// const Audio = window.Audio || window.webkitAudio;
 				// const audio = new Audio(audioUrl);
+
+				// console.log(audio);
+				// audioControl.parentNode.appendChild(audio);
+				console.log(audioControl.parentNode.childNodes);
 				
-				// audioReplay.audio = audio;
-				audioReplay.disabled = false;
+				// // audioReplay.audio = audio;
+				// audioReplay.disabled = false;
 
-				let fileReader = new FileReader();
-				// let arrayBuffer = await e.target.audioBlob.arrayBuffer();
-				const AudioContext = window.AudioContext || window.webkitAudioContext; 
-				/** @type {AudioContext} */
-				const audioContext = new AudioContext();
-				console.log("audioContext:", audioContext);
+				// let fileReader = new FileReader();
+				// // let arrayBuffer = await e.target.audioBlob.arrayBuffer();
+				// const AudioContext = window.AudioContext || window.webkitAudioContext; 
+				// /** @type {AudioContext} */
+				// const audioContext = new AudioContext();
+				// console.log("audioContext:", audioContext);
 				
-				fileReader.onloadend = () => {
-					let arrayBuffer = fileReader.result;
-					console.log("arrayBuffer:", arrayBuffer);
-					audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+				// fileReader.onloadend = () => {
+				// 	let arrayBuffer = fileReader.result;
+				// 	console.log("arrayBuffer:", arrayBuffer);
+				// 	audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
 
-						console.log("audioBuffer:", audioBuffer);
+				// 		console.log("audioBuffer:", audioBuffer);
 						
-						let source = audioContext.createBufferSource();
-						source.buffer = audioBuffer;
-						if (!source.start)
-							source.start = source.noteOn;
+				// 		let source = audioContext.createBufferSource();
+				// 		source.buffer = audioBuffer;
+				// 		if (!source.start)
+				// 			source.start = source.noteOn;
 						
-						var gainNode = audioContext.createGain();
-						gainNode.gain.value = 1;
-						source.connect(gainNode);
-						gainNode.connect(audioContext.destination);
+				// 		var gainNode = audioContext.createGain();
+				// 		gainNode.gain.value = 1;
+				// 		source.connect(gainNode);
+				// 		gainNode.connect(audioContext.destination);
 						
-						lastSource = source;
+				// 		lastSource = source;
 
-						audioReplay.audioSource = source;
-						source.onended = () => {
-							audioReplay.playing = false;
-						};
-					}, (e) => {
-						console.error("Error Decoding Audio: ", e);
-					});
-				}
-				fileReader.readAsArrayBuffer(audioBlob);
+				// 		audioReplay.audioSource = source;
+				// 		source.onended = () => {
+				// 			audioReplay.playing = false;
+				// 		};
+				// 	}, (e) => {
+				// 		console.error("Error Decoding Audio: ", e);
+				// 	});
+				// }
+				// fileReader.readAsArrayBuffer(audioBlob);
 			},
 			onPermissionsFail: () => {
 				let childNodes = audioControl.parentNode.childNodes;
