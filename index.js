@@ -12,8 +12,9 @@ async function audioChange(e) {
 				lastSource.stop();
 				lastSource = undefined;
 			}
+			console.log("Checking for audioblob", e.target);
 			if (e.target.audioBlob) {
-				console.log("IM TRYING ALRIGHT!");
+				console.log("Attempting to replay");
 				e.target.audioBlob.arrayBuffer().then((arrayBuffer) => {
 					const AudioContext = window.AudioContext || window.webkitAudioContext; 
 					/** @type {AudioContext} */
