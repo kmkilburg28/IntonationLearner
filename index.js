@@ -21,6 +21,7 @@ async function audioChange(e) {
 			if (e.target.audioSource) {
 				console.log("Playing source");
 				e.target.audioSource.start(0);
+				console.log("Started source");
 				e.target.playing = true;
 				lastSource = e.target.audioSorce;
 			}
