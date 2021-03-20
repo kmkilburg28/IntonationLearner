@@ -13,7 +13,7 @@ async function audioChange(e) {
 				lastSource = undefined;
 			}
 			if (e.target.audioBlob) {
-				console.log("Attempting to replay!!!");
+				console.log("Attempting to replay!!");
 				let fileReader = new FileReader();
 				// let arrayBuffer = await e.target.audioBlob.arrayBuffer();
 				fileReader.onloadend = () => {
@@ -21,7 +21,8 @@ async function audioChange(e) {
 					console.log("arrayBuffer:", arrayBuffer);
 					const AudioContext = window.AudioContext || window.webkitAudioContext; 
 					/** @type {AudioContext} */
-					let audioContext = new AudioContext();
+					const audioContext = new AudioContext();
+					audioContext.resume();
 					console.log("audioContext:", audioContext);
 					audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
 
