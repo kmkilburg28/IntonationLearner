@@ -1,4 +1,34 @@
+let isUnlocked = false;
+const AudioContext = window.AudioContext || window.webkitAudioContext; 
+/** @type {AudioContext} */
+const audioContext = new AudioContext();
+function unlock() {
+			
+	// if(isIOS || this.unlocked)
+	if(isUnlocked)
+		return;
+
+	// create empty buffer and play it
+	let buffer = audioContext.createBuffer(1, 1, 22050);
+	let source = audioContext.createBufferSource();
+	source.buffer = buffer;
+	source.connect(audioContext.destination);
+	if (source.start)
+		source.start(0);
+	else if (source.noteOn)
+		source.noteOn(0);
+
+	// by checking the play state after some time, we know if we're really unlocked
+	setTimeout(function() {
+		if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
+			isUnlocked = true;
+		}
+	}, 0);
+
+}
+
 async function audioChange(e) {
+	audioContext.resume();
 	let audioControl = e.target;
 	let chart = audioControl.chart;
 	if (audioControl.textContent === "Stop") {
@@ -11,19 +41,21 @@ async function audioChange(e) {
 		// 	audioReplaySound.play();
 		// });
 		let lastSource = undefined;
-		audioReplay.addEventListener('click', async (e) => {
+		audioReplay.addEventListener('click', (e) => {
+			audioContext.resume();
+			unlock();
 			if (e.target.playing) {
 				console.log("Stopping source1");
-				lastSource.stop();
-				e.target.playing = false;
-				lastSource = undefined;
+				try {
+					lastSource.stop();
+					e.target.playing = false;
+					lastSource = undefined;
+				} catch (exception) {}
 			}
 			if (e.target.audioBlob) {
 				let fileReader = new FileReader();
 				// let arrayBuffer = await e.target.audioBlob.arrayBuffer();
-				const AudioContext = window.AudioContext || window.webkitAudioContext; 
-				/** @type {AudioContext} */
-				const audioContext = new AudioContext();
+				
 				console.log("audioContext:", audioContext);
 				
 				fileReader.onloadend = () => {
@@ -52,18 +84,18 @@ async function audioChange(e) {
 						
 						// source.buffer.getChannelData(0);
 
-						audioReplay.audioSource = source;
+						// audioReplay.audioSource = source;
 						source.onended = () => {
 							console.log("Stopping source2");
 							audioReplay.playing = false;
 						};
 
 						console.log("Playing source");
-						console.log(e.target.audioSource.buffer.getChannelData(0));
-						e.target.audioSource.start(0);
+						console.log(source.buffer.getChannelData(0));
+						source.start();
 						console.log("Started source");
 						e.target.playing = true;
-						lastSource = e.target.audioSorce;
+						lastSource = source;
 					}, (e) => {
 						console.error("Error Decoding Audio: ", e);
 					});
