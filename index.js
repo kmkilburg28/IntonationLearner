@@ -7,33 +7,36 @@ async function audioChange(e) {
 	else {
 		let audioReplay = document.getElementById('audioReplay');
 		let lastSource = undefined;
-		audioReplay.addEventListener('click', (e) => {
+		audioReplay.addEventListener('click', async (e) => {
 			if (lastSource) {
 				lastSource.stop();
 				lastSource = undefined;
 			}
-			console.log("Checking for audioblob", e.target);
 			if (e.target.audioBlob) {
 				console.log("Attempting to replay");
-				e.target.audioBlob.arrayBuffer().then((arrayBuffer) => {
-					const AudioContext = window.AudioContext || window.webkitAudioContext; 
-					/** @type {AudioContext} */
-					let audioContext = new AudioContext();
-					audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
-						let source = audioContext.createBufferSource();
-						source.buffer = audioBuffer;
-						// if (!source.start)
-						// 	source.start = source.noteOn;
-						
-						var gainNode = audioContext.createGain()
-						gainNode.gain.value = 1
-						source.connect(gainNode)
-						gainNode.connect(audioContext.destination)
-						
-						lastSource = source;
-						source.start(0);
-					});
-				});
+				let arrayBuffer = await e.target.audioBlob.arrayBuffer();
+				console.log("arrayBuffer:", arrayBuffer);
+				const AudioContext = window.AudioContext || window.webkitAudioContext; 
+				/** @type {AudioContext} */
+				let audioContext = new AudioContext();
+				console.log("audioContext:", audioContext);
+				let audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+				console.log("audioBuffer:", audioBuffer);
+				
+				let source = audioContext.createBufferSource();
+				source.buffer = audioBuffer;
+				if (!source.start)
+					source.start = source.noteOn;
+				
+				var gainNode = audioContext.createGain()
+				gainNode.gain.value = 1
+				source.connect(gainNode)
+				gainNode.connect(audioContext.destination)
+				
+				lastSource = source;
+				console.log("Start source");
+				source.start(0);
+				console.log("Source Started");
 			}
 		});
 		const audioRecorder = new AudioRecorder({
