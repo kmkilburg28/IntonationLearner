@@ -7,9 +7,9 @@ async function audioChange(e) {
 	else {
 		let audioReplay = document.getElementById('audioReplay');
 		let audioReplaySound = document.getElementById('audioReplaySound');
-		audioReplay.addEventListener('click', (e) => {
-			audioReplaySound.play();
-		});
+		// audioReplay.addEventListener('click', (e) => {
+		// 	audioReplaySound.play();
+		// });
 		// let lastSource = undefined;
 		// audioReplay.addEventListener('click', async (e) => {
 		// 	if (e.target.playing) {
@@ -54,11 +54,11 @@ async function audioChange(e) {
 
 				audioReplaySound.src = audioUrl;
 				// console.log(audioReplay.parentNode.childNodes);
-				audioReplay.disabled = false;
-				audioReplaySound.play();
-				const Audio = window.Audio || window.webkitAudio;
-				const audio = new Audio(audioUrl);
-				audio.play();
+				// audioReplay.disabled = false;
+				// audioReplaySound.play();
+				// const Audio = window.Audio || window.webkitAudio;
+				// const audio = new Audio(audioUrl);
+				// audio.play();
 
 				// console.log(audio);
 				// audioReplay.parentNode.appendChild(audio);
