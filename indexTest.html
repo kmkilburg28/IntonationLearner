@@ -1,0 +1,136 @@
+<title> Local Storage JS -- Test </title>
+
+<style media = "screen">
+    input, button {
+        padding: 7px;
+        height: 40px;
+    }
+
+    fieldset, audio {
+        margin-bottom: 20px;
+    }
+
+    .buttonR {
+        background-color: red;
+        height: 20px;
+        line-height: 0.3;
+        width: 30px;
+        color: #FFF;
+        font-size: x-small;
+        padding: 0px;
+    }
+
+    .buttonS {
+        background-color: darkgrey;
+        height: 20px;
+        line-height: 0.3;
+        width: 30px;
+        color: #FFF;
+        font-size: x-small;
+        padding: 0px;
+    }
+
+    .buttonP {
+        background-color:green;
+        height: 20px;
+        line-height: 0.3;
+        width: 30px;
+        color: #FFF;
+        font-size: x-small;
+        padding: 0px;
+    }
+
+
+</style>
+
+<body>
+    <h1 id="title">Experiment #1</h1>
+    <fieldset>
+        <legend>Hello, there! What's your name?</legend>
+        <h2> Name: </h2>
+        <input id="inpValue" type="text" placeholder="Enter Name...">
+        <button type="button" id="btnInsert" >Submit</button>
+    </fieldset>
+
+    <fieldset id="insDiv" style="display: none">
+        <legend>Instructions</legend>
+        <div id="insOutput"></div>
+        <button type="button" id="letsBegin">Let's Begin</button>
+    </fieldset>
+
+    <fieldset id="audioDiv" style="display: none">
+        <legend>Audio Files</legend>
+        <div id="audioOutput1">
+            
+            <p>File #1:</p>
+            <audio controls>
+                <source src="Sample Recordings\Are you sure.wav" type="audio/wav">
+            </audio> 
+            
+            <br>
+            <div id="controls">
+                <button class="button buttonR" id="recordButton">Rec</button>
+                <button class = "button buttonS" id="stopButton" disabled>Stop</button>
+                <button class="button buttonP" id="playButton" disabled>Play</button>
+                
+            </div>
+            <br>
+            <input type="file" accept="audio/*" capture>
+            <br>
+            <input type="file" accept="audio/*" capture>
+            <hr>
+          
+        </div>
+    </fieldset>
+
+</body>
+
+<script type ="text/javascript">
+
+    //Getting user input
+    const inpValue = document.getElementById("inpValue");
+    const btnInsert = document.getElementById("btnInsert");
+    const letsBegin = document.getElementById("letsBegin");
+    const insOutput = document.getElementById("insOutput");
+    const insDiv = document.getElementById("insDiv");
+    const audioDiv = document.getElementById("audioDiv");
+
+    btnInsert.onclick = function() {
+        const key = "name";
+        const value = inpValue.value;
+        insDiv.style.display = 'block';
+
+        //How to set to only appear if true? //Reload bug
+        if (key && value) {
+            localStorage.setItem(key, value);
+            location.reload();
+        }
+    };
+
+
+    // Populate instructions div
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = "name";
+        const value = localStorage.getItem(key);
+
+        insOutput.innerHTML += "Thanks for participating in our study, " + `${value}` +"!" + "<br>" + "<br>" + 
+        "1. Please listen to each audio file once." + "<br>" + 
+        "2. Then, record yourself saying that same sentence into the microphone 3 times." + "<br>" + 
+        "3. That's it, easy peasy!" + "<br>"+ "<br>";
+    }
+
+    letsBegin.onclick = function() {
+        audioDiv.style.display = 'block';
+
+        let recorder = navigator.mediaDevices.getUserMedia({audio:true,});
+        recorder.then(function(mediaStream) {
+            let audio = document.querySelector('audio');
+            audio.src = window.URL.createObjectURL(mediaStream);
+            audio.onloadedmetadata = function(e) {
+                audio.play();
+            };
+        });
+
+        recorder.catch(function(err) {console.log(err.name); });
+    };
+</script>
