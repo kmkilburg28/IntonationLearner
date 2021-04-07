@@ -114,7 +114,7 @@ async function audioChange(e) {
 			},
 			onAudioUpdate: (audioData, sampleRate) => {
 				
-				let frequency = window.yin(audioData, sampleRate, 0.07);
+				let frequency = getFrequency(audioData, sampleRate);
 				console.log(audioData)
 
 				console.log(frequency);
