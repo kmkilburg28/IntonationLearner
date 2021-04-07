@@ -1,14 +1,15 @@
 const modelAudioFiles = [
-	"Model Speaker Files/Are you sure.wav",
-	"Model Speaker Files/at home.wav",
-	"Model Speaker Files/Big Favor.wav",
-	"Model Speaker Files/how dare.wav",
-	"Model Speaker Files/I cant help.wav",
-	"Model Speaker Files/Its too bad.wav",
-	"Model Speaker Files/NYC.wav",
-	"Model Speaker Files/risk.wav",
-	"Model Speaker Files/somewhere.wav",
-	"Model Speaker Files/thank you.wav",
+	"Model Speaker Files/A.wav",
+	"Model Speaker Files/B.wav",
+	"Model Speaker Files/C.wav",
+	"Model Speaker Files/D.wav",
+	"Model Speaker Files/E.wav",
+	"Model Speaker Files/F.wav",
+	"Model Speaker Files/G.wav",
+	"Model Speaker Files/H.wav",
+	"Model Speaker Files/I.wav",
+	"Model Speaker Files/J.wav",
+	"Model Speaker Files/K.wav",
 ];
 function initializeSelectAudio(selectId) {
 	const selectDOM = document.getElementById(selectId);

@@ -23,7 +23,8 @@
 			const modelAudioButton = document.getElementById('modelAudioButton');
 			modelAudioButton.addEventListener('click', async function() {
 				const selectDOM = document.getElementById('modelAudioSelect')
-				const audioBuffer = await loadAudioFile(selectDOM.value);
+				const baseURL = "https://kmkilburg28.github.io/IntonationLearner/";
+				const audioBuffer = await loadAudioFile(baseURL + selectDOM.value);
 				console.log(parseAudioBuffer(audioBuffer));
 				playAudioBuffer(audioBuffer, 1);
 			});
