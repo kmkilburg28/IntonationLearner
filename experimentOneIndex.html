@@ -117,22 +117,7 @@ var input; 							//MediaStreamAudioSourceNode we'll be recording
         video:false 
     }
 
-    navigator.mediaDevices.getUserMedia(constraints)
-    .then(function(stream) {
-        console.log("getUserMedia() success, stream created, initializing Recorder.js ...");
 
-		audioContext = new AudioContext();
-
-		gumStream = stream;
-		input = audioContext.createMediaStreamSource(stream);
-		rec = new Recorder(input,{numChannels:1})
-		rec.record()
-		console.log("Recording started");
-
-	}).catch(function(err) {
-    	recordButton.disabled = false;
-    	stopButton.disabled = true;
-	})
 
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioContext;
@@ -146,8 +131,25 @@ stopButton.addEventListener("click", stopRecording);
 
 function startRecording() {
 	console.log("recordButton clicked");
+
 	recordButton.disabled = true;
 	stopButton.disabled = false;
+
+    navigator.mediaDevices.getUserMedia(constraints)
+    .then(function(stream) {
+        console.log("getUserMedia() success, stream created, initializing Recorder.js ...");
+
+		audioContext = new AudioContext();
+		gumStream = stream;
+		input = audioContext.createMediaStreamSource(stream);
+		rec = new Recorder(input,{numChannels:1})
+		rec.record()
+		console.log("Recording started");
+
+	}).catch(function(err) {
+    	recordButton.disabled = false;
+    	stopButton.disabled = true;
+	})
 
 }
 
