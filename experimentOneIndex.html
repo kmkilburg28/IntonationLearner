@@ -112,28 +112,12 @@ var gumStream; 						//stream from getUserMedia()
 var rec; 							//Recorder.js object
 var input; 							//MediaStreamAudioSourceNode we'll be recording
 
-var AudioContext = window.AudioContext || window.webkitAudioContext;
-var audioContext;
-
-var recordButton = document.getElementById("recordButton");
-var stopButton = document.getElementById("stopButton");
-
-//add events to those 2 buttons
-recordButton.addEventListener("click", startRecording);
-stopButton.addEventListener("click", stopRecording);
-
-function startRecording() {
-	console.log("recordButton clicked");
-
     var constraints = { 
         audio: true, 
         video:false 
     }
 
-	recordButton.disabled = true;
-	stopButton.disabled = false;
-
-	navigator.mediaDevices.getUserMedia(constraints)
+    navigator.mediaDevices.getUserMedia(constraints)
     .then(function(stream) {
         console.log("getUserMedia() success, stream created, initializing Recorder.js ...");
 
@@ -148,7 +132,23 @@ function startRecording() {
 	}).catch(function(err) {
     	recordButton.disabled = false;
     	stopButton.disabled = true;
-	});
+	})
+
+var AudioContext = window.AudioContext || window.webkitAudioContext;
+var audioContext;
+
+var recordButton = document.getElementById("recordButton");
+var stopButton = document.getElementById("stopButton");
+
+//add events to those 2 buttons
+recordButton.addEventListener("click", startRecording);
+stopButton.addEventListener("click", stopRecording);
+
+function startRecording() {
+	console.log("recordButton clicked");
+	recordButton.disabled = true;
+	stopButton.disabled = false;
+
 }
 
 function stopRecording() {
@@ -176,8 +176,8 @@ function createDownloadLink(blob) {
 	//add controls to the <audio> element
 	au.controls = true;
 	au.src = url;
-
-	//save to disk link
+    
+	//Download link
 	link.href = url;
 	link.download = filename + ".wav"; //download forces the browser to donwload the file using the filename
 	link.innerHTML = "Save to disk";
