@@ -1,0 +1,217 @@
+<title>Experiment #1</title>
+
+<style media = "screen">
+    input, button {
+        padding: 7px;
+        height: 30px;
+    }
+
+    fieldset {
+        margin-bottom: 10px;
+    }
+
+
+</style>
+
+<body>
+    <h1 id="title">Experiment #1-- Test</h1>
+    <fieldset>
+        <legend>Hello, there! What's your name?</legend>
+        <h2> Name: </h2>
+        <input id="nameInput" type="text" placeholder="Enter Name...">
+        <button type="button" id="btnSubmit" >Submit</button>
+    </fieldset>
+
+    <fieldset id="insDiv" style="display: none">
+        <legend>Instructions</legend>
+        <div id="insOutput"></div>
+        <button type="button" id="btnBegin">Let's Begin</button>
+    </fieldset>
+
+    <fieldset id="audioDiv" style="display: none">
+        <legend>Audio Files</legend>
+        <div id="audioOutput1">
+             <p>File #1: New York City is a tough place to live.</p>
+             <audio controls>
+                <source id="G" src="Model Speaker Files/G.wav" type="audio/wav">
+            </audio> </br></br>
+
+            <p>File #2: Are you sure about that?</p>
+            <audio controls>
+               <source id="G" src="Model Speaker Files/A.wav" type="audio/wav">
+           </audio> </br></br>
+
+           <p>File #3: Make yourself at home.</p>
+           <audio controls>
+              <source id="G" src="Model Speaker Files/B.wav" type="audio/wav">
+          </audio> </br></br>
+
+          <p>File #4: I have a big favor to ask.</p>
+          <audio controls>
+             <source id="G" src="Model Speaker Files/C.wav" type="audio/wav">
+         </audio> </br></br>
+
+         <p>File #5: It's too bad that you can't come.</p>
+         <audio controls>
+            <source id="G" src="Model Speaker Files/F.wav" type="audio/wav">
+        </audio> </br></br>
+
+            <div id="controls">
+                <button id="recordButton">Record</button>
+                <button id="stopButton" disabled>Stop</button>
+                <ol id="recordingsList"></ol>
+            </div> 
+            <hr> 
+        </div>
+    </fieldset>
+    <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
+</body>
+
+<script type ="text/javascript">
+
+    //Instructions Div Portion
+    const nameInput = document.getElementById("nameInput");
+    const btnSubmit = document.getElementById("btnSubmit");
+    const form = document.getElementById('form');
+    const btnBegin = document.getElementById("btnBegin");
+    const insDiv = document.getElementById("insDiv");
+    const insOutput = document.getElementById("insOutput");
+    
+    btnSubmit.onclick = function() {
+        insDiv.style.display = 'block';
+        localStorage.setItem('name', nameInput.value);
+        nameDisplayCheck();
+    };
+
+    function nameDisplayCheck() {
+
+        if(localStorage.getItem('name')) {
+            let name = localStorage.getItem('name');
+            insOutput.innerHTML = "Thanks for participating in our study, " + name + "!" + "<br>" + "<br>" + 
+        "1. Please listen to each audio file once." + "<br>" + 
+        "2. Then, record yourself saying that same sentence into the microphone 3 times." + "<br>" + 
+        "3. That's it, easy peasy!" + "<br>"+ "<br>";
+        }
+    }
+
+    document.body.onload = nameDisplayCheck;
+    
+    btnBegin.onclick = function() {
+        audioDiv.style.display = 'block';
+        localStorage.setItem('G', 'G');
+        localStorage.setItem('D', 'D');
+        localStorage.setItem('H', 'H');
+        localStorage.setItem('A', 'A');
+        localStorage.setItem('K', 'K');
+    }
+
+//Audio Div Portion
+URL = window.URL || window.webkitURL;
+
+var gumStream; 						//stream from getUserMedia()
+var rec; 							//Recorder.js object
+var input; 							//MediaStreamAudioSourceNode we'll be recording
+
+    var constraints = { 
+        audio: true, 
+        video:false 
+    }
+
+    navigator.mediaDevices.getUserMedia(constraints)
+    .then(function(stream) {
+        console.log("getUserMedia() success, stream created, initializing Recorder.js ...");
+
+		audioContext = new AudioContext();
+
+		gumStream = stream;
+		input = audioContext.createMediaStreamSource(stream);
+		rec = new Recorder(input,{numChannels:1})
+		rec.record()
+		console.log("Recording started");
+
+	}).catch(function(err) {
+    	recordButton.disabled = false;
+    	stopButton.disabled = true;
+	})
+
+var AudioContext = window.AudioContext || window.webkitAudioContext;
+var audioContext;
+
+var recordButton = document.getElementById("recordButton");
+var stopButton = document.getElementById("stopButton");
+
+//add events to those 2 buttons
+recordButton.addEventListener("click", startRecording);
+stopButton.addEventListener("click", stopRecording);
+
+function startRecording() {
+	console.log("recordButton clicked");
+	recordButton.disabled = true;
+	stopButton.disabled = false;
+
+}
+
+function stopRecording() {
+	console.log("stopButton clicked");
+
+	stopButton.disabled = true;
+	recordButton.disabled = false;
+	rec.stop();
+	gumStream.getAudioTracks()[0].stop();
+
+	rec.exportWAV(createDownloadLink);
+}
+
+function createDownloadLink(blob) {
+	
+	var url = URL.createObjectURL(blob);
+	var au = document.createElement('audio');
+	var li = document.createElement('li');
+	var link = document.createElement('a');
+    var audioName;
+
+    var arrayLength = document.querySelectorAll("#recordingsList li").length +1;
+    var filename = localStorage.getItem('name') + arrayLength;
+
+	//add controls to the <audio> element
+	au.controls = true;
+	au.src = url;
+    
+	//Download link
+	link.href = url;
+	link.download = filename + ".wav"; //download forces the browser to donwload the file using the filename
+	link.innerHTML = "Save to disk";
+
+	//add the new audio element to li 
+	li.appendChild(au); 
+	
+	//add the filename to the li
+	li.appendChild(document.createTextNode(filename+".wav "))
+
+	//add the save to disk link to li
+	li.appendChild(link);
+	
+	//upload link
+	var upload = document.createElement('a');
+	upload.href="#";
+	upload.innerHTML = "Upload";
+	upload.addEventListener("click", function(event){
+		  var xhr=new XMLHttpRequest();
+		  xhr.onload=function(e) {
+		      if(this.readyState === 4) {
+		          console.log("Server returned: ",e.target.responseText);
+		      }
+		  };
+		  var fd=new FormData();
+		  fd.append("audio_data",blob, filename);
+		  xhr.open("POST","upload.php",true);
+		  xhr.send(fd);
+	})
+	li.appendChild(document.createTextNode (" "))//add a space in between
+	li.appendChild(upload)//add the upload link to li
+
+	//add the li element to the ol
+	recordingsList.appendChild(li);
+}
+
+</script>
