@@ -88,7 +88,11 @@ class AudioRecorder {
 		const AudioContext = window.AudioContext || window.webkitAudioContext; 
 		const audioContext = new AudioContext();
 		const source = audioContext.createMediaStreamSource(stream);
-		const processor = audioContext.createScriptProcessor(1024, 1, 1);
+		const gainNode = audioContext.createGain();
+		gainNode.gain.value = 4;
+		source.connect(gainNode);
+		const WINDOW_SIZE = 2048; // 2048 - down to 43 Hz; 1024 - down to 86 Hz
+		const processor = audioContext.createScriptProcessor(WINDOW_SIZE, 1, 1);
 		processor.onaudioprocess = (e) => this.onAudioUpdate(e);
 	
 		/** @type{MediaRecorder} */
@@ -119,7 +123,7 @@ class AudioRecorder {
 			audioChannel[i] = audioChannelRef[i];
 		}
 		if (this.callbacks.onAudioUpdate)
-			this.callbacks.onAudioUpdate(audioChannel);
+			this.callbacks.onAudioUpdate(audioChannel, audioBuffer.sampleRate);
 	}
 
 	async onDataAvailableRecorder(e) {

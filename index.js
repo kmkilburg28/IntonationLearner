@@ -112,15 +112,18 @@ async function audioChange(e) {
 			onAudioStart: () => {
 				audioControl.textContent = "Stop";
 			},
-			onAudioUpdate: (audioData) => {
-				let labelInd = parseInt(chart.data.labels[chart.data.labels.length - 1]);
-				chart.data.datasets.forEach((dataset) => { dataset.data = []; });
-				for (let i = 0; i < 200; ++i) {
-					// chart.data.labels.push(labelInd + i);
-					chart.data.datasets.forEach((dataset) => {
-						dataset.data.push(audioData[i]);
-					});
-				}
+			onAudioUpdate: (audioData, sampleRate) => {
+				
+				let frequency = window.yin(audioData, sampleRate, 0.07);
+				console.log(audioData)
+
+				console.log(frequency);
+				chart.data.datasets.forEach((dataset) => {
+					dataset.data.push(frequency);
+					if (dataset.data.length > 200)
+						dataset.data.shift();
+				});
+				
 				chart.update();
 			},
 			onAudioStop: (audioBlob) => {
