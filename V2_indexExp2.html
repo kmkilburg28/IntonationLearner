@@ -1,0 +1,291 @@
+<title>Experiment #1</title>
+
+<style media = "screen">
+    input, button {
+        padding: 7px;
+        height: 30px;
+    }
+
+    fieldset {
+        margin-bottom: 10px;
+    }
+
+
+</style>
+
+<body>
+    <h1 id="title">Experiment #1-- Test</h1>
+    <fieldset>
+        <legend>Hello, there! What's your name?</legend>
+        <h2> Name: </h2>
+        <input id="nameInput" type="text" placeholder="Enter Name...">
+        <button type="button" id="btnSubmit" >Submit</button>
+    </fieldset>
+
+    <fieldset id="insDiv" style="display: none">
+        <legend>Instructions</legend>
+        <div id="insOutput"></div>
+        <button type="button" id="btnBegin">Let's Begin</button>
+    </fieldset>
+
+    <fieldset id="audioDiv" style="display: none">
+        <legend>Audio Files</legend>
+        <div id="audioOutput1">
+             <p>File #1: New York City is a tough place to live.</p>
+             <audio controls>
+                <source id="G" src="Model Speaker Files/G.wav" type="audio/wav">
+            </audio> </br></br>
+
+            <p>File #2: Are you sure about that?</p>
+            <audio controls>
+               <source id="G" src="Model Speaker Files/A.wav" type="audio/wav">
+           </audio> </br></br>
+
+           <p>File #3: Make yourself at home.</p>
+           <audio controls>
+              <source id="G" src="Model Speaker Files/B.wav" type="audio/wav">
+          </audio> </br></br>
+
+          <p>File #4: I have a big favor to ask.</p>
+          <audio controls>
+             <source id="G" src="Model Speaker Files/C.wav" type="audio/wav">
+         </audio> </br></br>
+
+         <p>File #5: It's too bad that you can't come.</p>
+         <audio controls>
+            <source id="G" src="Model Speaker Files/F.wav" type="audio/wav">
+        </audio> </br></br>
+        <hr> 
+            <div id="controls">
+                <button id="recordButton">Record</button>
+                <button id="stopButton" disabled>Stop</button>
+            </br></br>
+            <h3>Recordings List</h3>
+                <ol id="recordingsList"></ol>
+            </div> 
+
+        </div>
+    </fieldset>
+    <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
+    <?php include 'upload.php' ;?>
+</body>
+
+<script type ="text/javascript">
+
+//Create database for Experiment 1
+
+const list = document.querySelector('ol');
+const form = document.querySelector('form');
+
+let db;
+
+window.onload = function() {
+    let request = window.indexedDB.open("Exp1", 1);
+    request.onerror = function() {
+        console.log("Databased crashed and burned. Try harder.");
+    };
+    request.onsuccess = function() {
+        console.log("Database opened successfully.");
+        db = request.result;
+        displayData();
+    }
+    request.onupgradeneeded = function(e) {
+        let db = e.target.result;
+        let objectStore = db.createObjectStore('users', { autoIncrement: true});
+        objectStore.createIndex('recording', 'recording', {unique: false});
+        console.log("Database setup complete.");
+    };
+
+    //Instructions Div Portion
+    const nameInput = document.getElementById("nameInput");
+    const btnSubmit = document.getElementById("btnSubmit");
+    const btnBegin = document.getElementById("btnBegin");
+    const insDiv = document.getElementById("insDiv");
+    const insOutput = document.getElementById("insOutput");
+
+    btnSubmit.onclick = addDataName;
+    function addDataName(e) {
+        insDiv.style.display = 'block';
+        localStorage.setItem('name', nameInput.value);
+        nameDisplayCheck();
+    };
+
+    function nameDisplayCheck() {
+        if(localStorage.getItem('name')) {
+            let name = localStorage.getItem('name');
+            insOutput.innerHTML = "Thanks for participating in our study, " + name + "!" + "<br>" + "<br>" + 
+        "1. Please listen to each audio file once." + "<br>" + 
+        "2. Then, record yourself saying that same sentence into the microphone 3 times." + "<br>" + 
+        "3. You should have 15 recordings by the end of this." + "<br>" + 
+        "4. That's it, easy peasy!" + "<br>"+ "<br>";
+        }
+    }
+
+    document.body.onload = nameDisplayCheck;
+    
+    btnBegin.onclick = function() {
+        audioDiv.style.display = 'block';
+    }
+    
+/////Audio Portion////
+    URL = window.URL || window.webkitURL;
+    
+    var gumStream; 
+    var rec; 						
+    var input; 							
+    var constraints = { audio: true, video:false }
+    let stream = navigator.mediaDevices.getUserMedia(constraints);
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
+    var audioContext;
+    var recordButton = document.getElementById("recordButton");
+    var stopButton = document.getElementById("stopButton");
+
+    recordButton.onclick = startRecording;
+    stopButton.onclick = addRecordingName;
+    
+    function startRecording() {
+        console.log("recordButton clicked");
+        recordButton.disabled = true;
+        stopButton.disabled = false;
+        
+        navigator.mediaDevices.getUserMedia(constraints)
+        .then(function(stream) {
+            console.log("getUserMedia() success, stream created, initializing...");
+            
+            audioContext = new AudioContext();
+            gumStream = stream;
+            input = audioContext.createMediaStreamSource(stream);
+            rec = new Recorder(input,{numChannels:1})
+            rec.record()
+            console.log("Recording started");
+        
+        }).catch(function(err) {
+            recordButton.disabled = false;
+            stopButton.disabled = true;
+        })
+    }
+
+    function addRecordingName(e) {
+        e.preventDefault();
+
+        var arrayLength = document.querySelectorAll("#recordingsList li").length;
+        var filename = localStorage.getItem('name') + arrayLength +'.wav';
+
+        let newItem = {
+            recording: filename,
+        };
+        
+        let transaction = db.transaction(['users'], 'readwrite');
+        let objectStore = transaction.objectStore('users');
+        let request = objectStore.add(newItem);
+        transaction.oncomplete = function() {
+            console.log("Transaction complete: " + filename + " added.");
+            displayData();
+        };
+        transaction.onerror = function() {
+            console.log("Transaction failed: " + filename + " not added.");
+        };
+        console.log("stopButton clicked");
+        stopButton.disabled = true;
+        recordButton.disabled = false;
+        rec.stop();
+        gumStream.getAudioTracks()[0].stop();
+        rec.exportWAV(createDownloadLink);
+        console.log("Recording stopped.")
+    }
+
+    function displayData() {
+        while(list.firstChild) {
+            list.removeChild(list.firstChild);
+        }
+
+        let objectStore = db.transaction('users').objectStore('users');
+        objectStore.openCursor().onsuccess = function(e) {
+            let cursor = e.target.result;
+            if (cursor) {
+                const listItem = document.createElement('li');
+                const para = document.createElement('p')
+
+                listItem.appendChild(para);
+                list.appendChild(listItem)
+
+                para.textContent = cursor.value.recording;
+                listItem.setAttribute('recording-id', cursor.value.id);
+
+                const playBtn = document.createElement('button');
+                listItem.appendChild(playBtn);
+                playBtn.textContent = "Play";
+                playBtn.onclick = playItem;
+
+                const deleteBtn = document.createElement('button');
+                listItem.appendChild(deleteBtn);
+                deleteBtn.textContent = "Delete";
+                deleteBtn.onclick = deleteItem;
+
+                const downloadLink = document.createElement('button');
+                listItem.appendChild(downloadLink);
+                downloadLink.textContent = "Download";
+                downloadLink.onclick = createDownloadLink;
+                
+                cursor.continue();
+            } else {
+                if(!list.firstChild) {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = "*crickets*";
+                    list.appendChild(listItem);
+                }
+                console.log("Recordings all displayed.");
+            }
+        };
+    }
+
+    function playItem(e) {
+        let recordingName = Number(e.target.getAttribute('recording-id'));
+        let transaction = db.transaction(['users'], 'readwrite');
+        let objectStore = transaction.objectStore('users');
+        let request = objectStore.get(recordingName);
+        let recording = document.querySelector("button");
+        recording.play();
+        console.log('Recording ' + recordingName + ' playing...');
+
+        if(!list.firstChild) {
+            const listItem = document.createElement('li');
+            listItem.textContent = "*crickets*";
+            list.appendChild(listItem);
+        }
+    };
+
+    function deleteItem(e) {
+        let recordingId = Number(e.target.getAttribute('recording-id'));
+        let transaction = db.transaction(['users'], 'readwrite');
+        let objectStore = transaction.objectStore('users');
+        let request = objectStore.delete(recordingId);
+
+        transaction.oncomplete = function() {
+            e.target.parentNode.parentNode.removeChild(e.target.parentNode);
+            console.log('Recording ' + recordingId + ' deleted');
+
+            if(!list.firstChild) {
+                let listItem = document.createElement('li');
+                listItem.textContent = "*crickets*";
+                list.appendChild(listItem);
+            }
+        };
+    }
+
+    function createDownloadLink(blob) {
+
+        let arrayLength = document.querySelectorAll("#recordingsList li").length;
+        let filename = localStorage.getItem('name') + arrayLength +'.wav';
+        input.srcObject = stream;
+        // let url = URL.createObjectURL(blob);
+
+        if(!list.firstChild) {
+            let listItem = document.createElement('li');
+            listItem.href = url;
+            listItem.textContent = "*crickets*";
+            list.appendChild(listItem);
+        }
+    }
+}
+</script>
