@@ -141,7 +141,7 @@ window.onload = function() {
     var stopButton = document.getElementById("stopButton");
 
     recordButton.onclick = startRecording;
-    stopButton.onclick = addRecordingName;
+    stopButton.onclick = stopRecording;
     
     function startRecording() {
         console.log("recordButton clicked");
@@ -165,14 +165,28 @@ window.onload = function() {
         })
     }
 
-    function addRecordingName(e) {
+    function stopRecording(e) {
         e.preventDefault();
 
-        var arrayLength = document.querySelectorAll("#recordingsList li").length;
-        var filename = localStorage.getItem('name') + arrayLength +'.wav';
+        // var arrayLength = document.querySelectorAll("#recordingsList li").length;
+        // var filename = localStorage.getItem('name') + arrayLength +'.wav';
+        console.log("stopButton clicked");
+        stopButton.disabled = true;
+        recordButton.disabled = false;
+        rec.stop();
+        gumStream.getAudioTracks()[0].stop();
+        rec.exportWAV(buildList);
+        console.log("Recording stopped.")
+    }
+
+    function buildList(blob) {
+        let arrayLength = document.querySelectorAll("#recordingsList li").length;
+        let filename = localStorage.getItem('name') + arrayLength +'.wav';
+        let url = URL.createObjectURL(blob);
 
         let newItem = {
-            recording: filename,
+            recording: blob,
+            name: filename,
         };
         
         let transaction = db.transaction(['users'], 'readwrite');
@@ -185,13 +199,13 @@ window.onload = function() {
         transaction.onerror = function() {
             console.log("Transaction failed: " + filename + " not added.");
         };
-        console.log("stopButton clicked");
-        stopButton.disabled = true;
-        recordButton.disabled = false;
-        rec.stop();
-        gumStream.getAudioTracks()[0].stop();
-        rec.exportWAV(createDownloadLink);
-        console.log("Recording stopped.")
+
+        if(!list.firstChild) {
+            let listItem = document.createElement('li');
+            listItem.href = url;
+            listItem.textContent = "*crickets*";
+            list.appendChild(listItem);
+        }   
     }
 
     function displayData() {
@@ -201,18 +215,31 @@ window.onload = function() {
 
         let objectStore = db.transaction('users').objectStore('users');
         objectStore.openCursor().onsuccess = function(e) {
-            let cursor = e.target.result;
+            let cursor = e.target.result; //request === e.target
             if (cursor) {
                 const listItem = document.createElement('li');
                 const para = document.createElement('p')
 
                 listItem.appendChild(para);
-                list.appendChild(listItem)
+                list.appendChild(listItem);
 
-                para.textContent = cursor.value.recording;
-                listItem.setAttribute('recording-id', cursor.value.id);
+                para.textContent = cursor.value.name;
+                listItem.setAttribute('recording-id', cursor.key);
+                listItem.setAttribute('recording-url', cursor.value.recording);
+                // console.log(cursor.key);
+                // console.log(cursor.value.recording);
+
+                
+                //create audio - controls = false
+                //audio element ID
+                //set url with cursor.value.recording
+                const audio = document.createElement("audio");
+                audio.className = "audioEl";
+                audio.src = cursor.value.recording;
+                listItem.appendChild(audio);
 
                 const playBtn = document.createElement('button');
+                playBtn.className = "playBtn";
                 listItem.appendChild(playBtn);
                 playBtn.textContent = "Play";
                 playBtn.onclick = playItem;
@@ -225,7 +252,7 @@ window.onload = function() {
                 const downloadLink = document.createElement('button');
                 listItem.appendChild(downloadLink);
                 downloadLink.textContent = "Download";
-                downloadLink.onclick = createDownloadLink;
+                downloadLink.onclick = buildList;
                 
                 cursor.continue();
             } else {
@@ -240,14 +267,22 @@ window.onload = function() {
     }
 
     function playItem(e) {
-        let recordingName = Number(e.target.getAttribute('recording-id'));
-        let transaction = db.transaction(['users'], 'readwrite');
-        let objectStore = transaction.objectStore('users');
-        let request = objectStore.get(recordingName);
-        let recording = document.querySelector("button");
-        recording.play();
-        console.log('Recording ' + recordingName + ' playing...');
 
+        //find the audio element for that button
+        document.getElementById("myAudio").play();
+        console.log('Recording ' + name + ' playing...');
+
+
+        // let transaction = db.transaction(['users'], 'readwrite');
+        // let objectStore = transaction.objectStore('users');
+        // let request = objectStore.getAll();
+        // request.onsuccess = (e) => {
+        //     let req = e.target;
+        //     console.log(req);
+        // }
+
+        
+        
         if(!list.firstChild) {
             const listItem = document.createElement('li');
             listItem.textContent = "*crickets*";
@@ -273,19 +308,5 @@ window.onload = function() {
         };
     }
 
-    function createDownloadLink(blob) {
-
-        let arrayLength = document.querySelectorAll("#recordingsList li").length;
-        let filename = localStorage.getItem('name') + arrayLength +'.wav';
-        input.srcObject = stream;
-        // let url = URL.createObjectURL(blob);
-
-        if(!list.firstChild) {
-            let listItem = document.createElement('li');
-            listItem.href = url;
-            listItem.textContent = "*crickets*";
-            list.appendChild(listItem);
-        }
-    }
 }
 </script>
