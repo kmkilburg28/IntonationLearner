@@ -7,7 +7,7 @@ const modelAudioFiles = [
 	"Model Speaker Files/F.wav",
 	"Model Speaker Files/G.wav",
 	"Model Speaker Files/H.wav",
-	"Model Speaker Files/I.wav",
+	// "Model Speaker Files/I.wav",
 	"Model Speaker Files/J.wav",
 	"Model Speaker Files/K.wav",
 ];
@@ -21,5 +21,18 @@ function initializeSelectAudio(selectId) {
 		audioOption.id = audioName;
 		audioOption.textContent = audioName;
 		selectDOM.appendChild(audioOption);
+	}
+}
+function initializeULAudio(ulId) {
+	const listDom = document.getElementById(ulId);
+	for (let modelAudioFile of modelAudioFiles) {
+		const listItemDOM = document.createElement('li');
+		const anchorDOM = document.createElement('a');
+		let audioName = modelAudioFile.split('/');
+		audioName = audioName[audioName.length-1].split('.')[0];
+		anchorDOM.textContent = audioName;
+		anchorDOM.href = "training.html?modelfile=" + audioName;
+		listItemDOM.appendChild(anchorDOM);
+		listDom.appendChild(listItemDOM);
 	}
 }

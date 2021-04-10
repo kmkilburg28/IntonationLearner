@@ -38,7 +38,7 @@ function playAudioBuffer(audioBuffer, volume=1) {
 
 /**
  * @param {AudioBuffer} audioBuffer 
- * @returns {{buffer: Float32Array, sampleRate: number, duration: number}}
+ * @returns {RawData}
  */
 function parseAudioBuffer(audioBuffer) {
 	// Grab averaged data
@@ -53,9 +53,39 @@ function parseAudioBuffer(audioBuffer) {
 	for (let i = 0; i < averagedChannelData.length; ++i) {
 		averagedChannelData[i] /= numChannels;
 	}
-	return {
-		buffer: averagedChannelData,
-		sampleRate: audioBuffer.sampleRate,
-		duration: audioBuffer.duration,
-	}
+	return new RawData(
+		averagedChannelData,
+		audioBuffer.sampleRate,
+		audioBuffer.duration,
+	);
+}
+
+/**
+ * @param {Chart} chart 
+ * @param {FrequencyData} frequencyData 
+ */
+function plotAudioFile(chart, frequencyData) {
+	console.log(chart);
+	console.log(chart.data);
+	console.log(chart.data.datasets);
+
+
+	chart.data.datasets.forEach((dataset) => {
+		// dataset.data.push(frequency);
+		// if (dataset.data.length > 200)
+		// 	dataset.data.shift();
+		if (dataset.label == "Model") {
+			console.log(frequencyData);
+			dataset.data = new Array(frequencyData.buffer.length);
+			console.log(dataset.data)
+			for (let i = 0; i < frequencyData.buffer.length; ++i) {
+				dataset.data[i] = frequencyData.buffer[i];
+				if (chart.data.labels.length <= i) {
+					chart.data.labels[i] = i;
+				}
+			}
+			console.log(dataset.data)
+		}
+	});
+	chart.update();
 }
