@@ -6,7 +6,7 @@ function ModelSegment(pitchArr){
 	var segments = new Array();
 	var segmentIndex = 1;
 	//The first time we detect a pitch is where we start our first segment
-	while(pitchArr[i] == 0){
+	while(pitchArr[i] <47){
 		i++;
 	}
 	segments[0] = i;
@@ -14,7 +14,7 @@ function ModelSegment(pitchArr){
 	var open = true;
 	for (; i < pitchArr.length; i++) {
 		//if we detect pitch when the segment is closed or if we don't detect pitch when the segment is open
-		if ((pitchArr[i] == 0) == open){
+		if ((pitchArr[i] < 47) == open){
 			//we start to count for how long we do(not) detect pitch
 			consec++;
 			//if we detect a sufficient amount of consecutive pitches(non-pitches)
@@ -34,5 +34,5 @@ function ModelSegment(pitchArr){
 		segments[segmentIndex] = pitchArr.length - 1 - consec;
 		open = !open;
 	}
-	return segments
+	return segments;
 }
