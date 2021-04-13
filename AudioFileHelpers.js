@@ -61,10 +61,11 @@ function parseAudioBuffer(audioBuffer) {
 }
 
 /**
- * @param {Chart} chart 
  * @param {FrequencyData} frequencyData 
+ * @param {Chart} chart
+ * @param {string} datasetLabel
  */
-function plotAudioFile(chart, frequencyData) {
+function plotAudioFile(frequencyData, chart, datasetLabel) {
 	console.log(chart);
 	console.log(chart.data);
 	console.log(chart.data.datasets);
@@ -74,7 +75,7 @@ function plotAudioFile(chart, frequencyData) {
 		// dataset.data.push(frequency);
 		// if (dataset.data.length > 200)
 		// 	dataset.data.shift();
-		if (dataset.label == "Model") {
+		if (dataset.label == datasetLabel) {
 			console.log(frequencyData);
 			dataset.data = new Array(frequencyData.buffer.length);
 			console.log(dataset.data)
@@ -85,6 +86,67 @@ function plotAudioFile(chart, frequencyData) {
 				}
 			}
 			console.log(dataset.data)
+		}
+	});
+	chart.update();
+}
+
+/**
+ * @param {Spline[]} S
+ * @param {Chart} chart
+ * @param {string} datasetLabel
+ */
+ function plotSpline(S, chart, datasetLabel) {
+	// console.log(S);
+	// console.log(chart);
+	// console.log(chart.data);
+	// console.log(chart.data.datasets);
+
+
+	chart.data.datasets.forEach((dataset) => {
+		// dataset.data.push(frequency);
+		// if (dataset.data.length > 200)
+		// 	dataset.data.shift();
+		if (dataset.label == datasetLabel) {
+			// console.log(frequencyData);
+			dataset.data = new Array(S.length);
+			const STEP_SIZE = 1;
+			// dataset.data[i] = S[i];
+			// let labelInd = S[0].x;
+			let i = 0;
+			for (let t  = 0; t < S[S.length-1].x; t += STEP_SIZE) {
+				if (i < S.length - 1 && S[i+1].x < t)
+					i = i + 1;
+				if (i > 0) {
+					let x = t - S[i].x;
+					let xSq = x * x;
+					let y =
+						S[i].a * xSq * x +
+						S[i].b * xSq +
+						S[i].c * x +
+						S[i].d;
+					chart.data.labels[t] = t;
+					dataset.data[t] = y;
+					// console.log(y);
+				}
+			}
+			// for (let i = 0; i < S.length - 1; ++i) {
+			// 	for (let x = S[i].x; x < S[i + 1].x; x += STEP_SIZE) {
+			// 		// if (chart.data.labels.length <= i) {
+			// 			let z = x - S[i].x;
+			// 			let xSq = z * z;
+			// 			let y =
+			// 				S[i].a * xSq * z +
+			// 				S[i].b * xSq +
+			// 				S[i].c * z +
+			// 				S[i].d;
+			// 			chart.data.labels[labelInd] = x;
+			// 			dataset.data[labelInd] = y;
+			// 			// console.log(y);
+			// 			++labelInd;
+			// 		// }
+			// 	}
+			// }
 		}
 	});
 	chart.update();

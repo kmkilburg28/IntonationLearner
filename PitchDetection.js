@@ -11,7 +11,7 @@ function getFrequency(buffer, sampleRate) {
  * @param {RawData} rawData
  * @param {number} WINDOW_SIZE default = 2048
  * @param {number} OVERLAP default = 1024
- * @returns {RawData}
+ * @returns {FrequencyData}
  */
 function getFrequencies(rawData, WINDOW_SIZE=2048, OVERLAP=2048-256) {
 	const buffer = rawData.buffer;

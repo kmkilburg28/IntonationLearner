@@ -12,6 +12,7 @@
 	<script src="PitchDetection.js" type="text/javascript"></script>
 	<script src="AudioRecorder.js" type="text/javascript"></script>
 	<script src="ModelSegment.js" type="text/javascript"></script>
+	<script src="SmoothingSpline.js" type="text/javascript"></script>
 	<script src="training.js" type="text/javascript"></script>
 </head>
 <body>
@@ -47,13 +48,11 @@
 
 	</div>
 	<script type="text/javascript">
-		let labels = [];
-		for (let i = 0; i < 200; ++i) {labels[i] = i};
 		function createConfig(pointStyle) {
 			return {
 				type: 'line',
 				data: {
-					labels: labels,
+					labels: [],
 					datasets: [{
 						label: 'Model',
 						backgroundColor: window.chartColors.red,
@@ -64,9 +63,27 @@
 						pointHoverRadius: 15,
 						showLine: false // no line shown
 					}, {
+						label: 'ModelSmooth',
+						backgroundColor: window.chartColors.blue,
+						borderColor: window.chartColors.blue,
+						data: [],
+						fill: false,
+						pointRadius: 2,
+						pointHoverRadius: 15,
+						showLine: false // no line shown
+					}, {
 						label: 'User',
 						backgroundColor: window.chartColors.blue,
 						borderColor: window.chartColors.blue,
+						data: [],
+						fill: false,
+						pointRadius: 2,
+						pointHoverRadius: 15,
+						showLine: false // no line shown
+					}, {
+						label: 'UserSmooth',
+						backgroundColor: window.chartColors.green,
+						borderColor: window.chartColors.green,
 						data: [],
 						fill: false,
 						pointRadius: 2,
@@ -124,7 +141,9 @@
 			const audioBuffer = await loadAudioFile(baseURL + filePath);
 			const parsedAudio = parseAudioBuffer(audioBuffer);
 			const frequencies = getFrequencies(parsedAudio);
-			plotAudioFile(chart, frequencies);
+			plotAudioFile(frequencies, chart, "Model");
+			const SplineArray = getSplineFromArray(frequencies.buffer);
+			plotSpline(SplineArray, chart, "ModelSmooth");
 			
 			let audioControl = document.getElementById("audioControl");
 			audioControl.chart = chart;
