@@ -21,6 +21,7 @@ class Spline {
 
 	/**
 	 * @param {number} x 
+	 * @returns {number}
 	 */
 	evaluate(x) {
 		let relX = x - this.x;
