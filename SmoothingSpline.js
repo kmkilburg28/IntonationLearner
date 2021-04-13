@@ -18,6 +18,20 @@ class Spline {
 		this.c = 0;
 		this.d = 0;
 	}
+
+	/**
+	 * @param {number} x 
+	 */
+	evaluate(x) {
+		let relX = x - this.x;
+		let xSq = relX * relX;
+		let y =
+			this.a * xSq * relX +
+			this.b * xSq +
+			this.c * relX +
+			this.d;
+		return y;
+	}
 }
 
 /**
