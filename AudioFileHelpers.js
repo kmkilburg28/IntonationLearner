@@ -61,20 +61,13 @@ function parseAudioBuffer(audioBuffer) {
 }
 
 /**
- * @param {Chart} chart 
  * @param {FrequencyData} frequencyData 
+ * @param {Chart} chart
+ * @param {string} datasetLabel
  */
-function plotAudioFile(chart, frequencyData) {
-	console.log(chart);
-	console.log(chart.data);
-	console.log(chart.data.datasets);
-
-
+function plotAudioFile(frequencyData, chart, datasetLabel) {
 	chart.data.datasets.forEach((dataset) => {
-		// dataset.data.push(frequency);
-		// if (dataset.data.length > 200)
-		// 	dataset.data.shift();
-		if (dataset.label == "Model") {
+		if (dataset.label == datasetLabel) {
 			console.log(frequencyData);
 			dataset.data = new Array(frequencyData.buffer.length);
 			console.log(dataset.data)
@@ -85,6 +78,31 @@ function plotAudioFile(chart, frequencyData) {
 				}
 			}
 			console.log(dataset.data)
+		}
+	});
+	chart.update();
+}
+
+/**
+ * @param {Spline[]} S
+ * @param {Chart} chart
+ * @param {string} datasetLabel
+ */
+ function plotSpline(S, chart, datasetLabel) {
+	chart.data.datasets.forEach((dataset) => {
+		if (dataset.label == datasetLabel) {
+			dataset.data = new Array(S.length);
+			const STEP_SIZE = 1;
+			let i = 0;
+			for (let t  = 0; t < S[S.length-1].x; t += STEP_SIZE) {
+				if (i < S.length - 1 && S[i+1].x < t)
+					i = i + 1;
+				if (i > 0) {
+					chart.data.labels[t] = t;
+					let y = S[i].evaluate(t);
+					dataset.data[t] = y;
+				}
+			}
 		}
 	});
 	chart.update();

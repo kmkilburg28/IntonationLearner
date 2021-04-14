@@ -1,5 +1,6 @@
 class FrequencyData {
-
+	/** @type {Float32Array} */ buffer;
+	/** @type {number} */ duration;
 	/**
 	 * @param {Float32Array} buffer 
 	 * @param {number} duration 

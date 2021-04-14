@@ -68,6 +68,9 @@ async function recordAudio(e) {
 				chart.update();
 			}
 
+			let SplineArray = getSplineFromArray(frequencesData);
+			plotSpline(SplineArray, chart, "UserSmooth");
+
 			// for (let i = 0; i <= audioData.length-WINDOW_SIZE; i += INCREMENT) {
 			// 	let subSection = audioData.subarray(i, i+WINDOW_SIZE);
 			// 	let frequency = getFrequency(subSection, sampleRate);
@@ -76,10 +79,10 @@ async function recordAudio(e) {
 			// 		frequencesData.shift();
 			// }
 
-			let frequency = getFrequency(audioData, sampleRate);
-			frequencesData.push(frequency);
-			if (frequencesData.length > chart.data.labels.length)
-				frequencesData.shift();
+			// let frequency = getFrequency(audioData, sampleRate);
+			// frequencesData.push(frequency);
+			// if (frequencesData.length > chart.data.labels.length)
+			// 	frequencesData.shift();
 
 			lastSample = audioData;
 		},
