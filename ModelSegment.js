@@ -21,7 +21,7 @@ function ModelSegment(pitchArr){
 			//we record where it started
 			if(consec >= THRESHOLD){
 				open = !open;
-				segments[segmentIndex] = i - THRESHOLD;
+				segments[segmentIndex] = i - THRESHOLD + 1;
 				segmentIndex++;
 				consec = 0;
 			}

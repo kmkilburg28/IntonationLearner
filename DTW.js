@@ -144,11 +144,8 @@ function warp(modelPitchArr, userPitchArr, flag){
 		k++;
 	}
 	if(flag > 0){
-		return warpedModel;
+		return SegmentFormat(warpedModel,warpedSeg);
 	}
-	if(flag < 0){
-		return warpedSeg;
-	}
-	return warpedUser;
+	return SegmentFormat(warpedModel,warpedSeg);
 }
 
