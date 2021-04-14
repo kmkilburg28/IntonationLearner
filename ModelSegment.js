@@ -1,4 +1,4 @@
-const THRESHOLD = 100
+const THRESHOLD = 10
 //Our segmented array will look like this: [startTimeOfsegment0, endTimeOfsegment0, ... , startTimeOfsegmentn, endTimeOfsegmentn]
 function ModelSegment(pitchArr){
 	var consec = 0;
