@@ -1,4 +1,4 @@
-const THRESHOLD = 100
+const THRESHOLD = 10
 //Our segmented array will look like this: [startTimeOfsegment0, endTimeOfsegment0, ... , startTimeOfsegmentn, endTimeOfsegmentn]
 function ModelSegment(pitchArr){
 	var consec = 0;
@@ -21,7 +21,7 @@ function ModelSegment(pitchArr){
 			//we record where it started
 			if(consec >= THRESHOLD){
 				open = !open;
-				segments[segmentIndex] = i - THRESHOLD;
+				segments[segmentIndex] = i - THRESHOLD + 1;
 				segmentIndex++;
 				consec = 0;
 			}
