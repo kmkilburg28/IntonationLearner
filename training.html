@@ -12,6 +12,7 @@
 	<script src="PitchDetection.js" type="text/javascript"></script>
 	<script src="AudioRecorder.js" type="text/javascript"></script>
 	<script src="ModelSegment.js" type="text/javascript"></script>
+	<script src="DTW.js" type="text/javascript"></script>
 	<script src="training.js" type="text/javascript"></script>
 </head>
 <body>
@@ -31,7 +32,7 @@
 				const audioBuffer = await loadAudioFile(baseURL + filePath);
 				const parsedAudio = parseAudioBuffer(audioBuffer);
 				console.log(parsedAudio);
-				const frequencies = getFrequencies(parsedAudio.buffer, parsedAudio.sampleRate);
+				const frequencies = getFrequencies(parsedAudio);
 				console.log(frequencies);
 				playAudioBuffer(audioBuffer, 1);
 				return frequencies;
