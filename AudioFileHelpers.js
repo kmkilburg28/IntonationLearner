@@ -59,13 +59,24 @@ function parseAudioBuffer(audioBuffer) {
 		audioBuffer.duration,
 	);
 }
+/**
+ * @param {string} rawDataString 
+ */
+function stringToRawData(rawDataString) {
+	let rawDataJSON = JSON.parse(rawDataString);
+	return new RawData(
+		Float32Array.from(Object.values(rawDataJSON.buffer)),
+		rawDataJSON.sampleRate,
+		rawDataJSON.duration
+	);
+}
 
 /**
  * @param {FrequencyData} frequencyData 
  * @param {Chart} chart
  * @param {string} datasetLabel
  */
-function plotAudioFile(frequencyData, chart, datasetLabel) {
+function plotFrequencies(frequencyData, chart, datasetLabel) {
 	chart.data.datasets.forEach((dataset) => {
 		if (dataset.label == datasetLabel) {
 			console.log(frequencyData);

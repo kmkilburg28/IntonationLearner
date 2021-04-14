@@ -14,19 +14,21 @@
 	<script src="ModelSegment.js" type="text/javascript"></script>
 	<script src="SmoothingSpline.js" type="text/javascript"></script>
 	<script src="lz-string.min.js" type="text/javascript"></script>
-	<script src="training.js" type="text/javascript"></script>
     <script src="DTW.js" type="text/javascript"></script>
 </head>
 <body>
 	<h2>Intonation Learner</h2>
 	<div>
 		<button onclick="document.location='index.html'">Exit</button>
-		<button id="listenButton">Listen</button>
+		<button id="playButtonModel">Listen</button>
 		<script>
-			const params = new URLSearchParams(window.location.search);
-			if (params.has("uploaded")) {} // TODO
+			const AudioContext = window.AudioContext || window.webkitAudioContext; 
+			/** @type {AudioContext} */
+			const audioContext = new AudioContext();
+			// const params = new URLSearchParams(window.location.search);
+			// if (params.has("uploaded")) {} // TODO
 
-			const modelFileName = params.get('modelfile');
+			const modelFileName = localStorage.getItem('modelfile');
 			const filePath = "Model Speaker Files/" + modelFileName + ".wav";
 
 			async function demoAudio() {
@@ -39,13 +41,13 @@
 				playAudioBuffer(audioBuffer, 1);
 				return frequencies;
 			};
-			const listenButton = document.getElementById('listenButton');
+			const listenButton = document.getElementById('playButtonModel');
 			listenButton.addEventListener('click', demoAudio);
 		</script>
 		<div class="container" style="width:40%;"></div>
 		<br>
 		<div>
-			<button id="audioControl">Record</button>
+			<button id="playUser">Play Recording</button>
 		</div>
 
 	</div>
@@ -123,8 +125,6 @@
 				}
 			};
 		}
-		const YIN_THRESHOLD_USER = 0.07;
-		const YIN_THRESHOLD_MODEL = 0.2;
 
 		window.onload = async function() {
 			var container = document.querySelector('.container');
@@ -144,14 +144,36 @@
 			const baseURL = "https://kmkilburg28.github.io/IntonationLearner/";
 			const audioBuffer = await loadAudioFile(baseURL + filePath);
 			const parsedAudio = parseAudioBuffer(audioBuffer);
-			const frequencies = getFrequencies(parsedAudio);
-			plotFrequencies(frequencies, chart, "Model");
-			const SplineArray = getSplineFromArray(frequencies.buffer);
-			plotSpline(SplineArray, chart, "ModelSmooth");
-			
-			let audioControl = document.getElementById("audioControl");
-			audioControl.chart = chart;
-			audioControl.addEventListener("click", recordAudio);
+			const frequenciesModel = getFrequencies(parsedAudio);
+			plotFrequencies(frequenciesModel, chart, "Model");
+			const SplineArrayModel = getSplineFromArray(frequenciesModel.buffer);
+			plotSpline(SplineArrayModel, chart, "ModelSmooth");
+
+			const rawUser = stringToRawData(LZString.decompress(localStorage.getItem("userRecording")));
+
+			const playButtonUser = document.getElementById("playUser");
+			playButtonUser.addEventListener('click', () => {
+
+				const audioBuffer = audioContext.createBuffer(
+					1,
+					rawUser.buffer.length,
+					rawUser.sampleRate
+				);
+				audioBuffer.getChannelData(0).set(rawUser.buffer);
+				const source = audioContext.createBufferSource();
+				source.buffer = audioBuffer;
+				// const gainNode = audioContext.createGain();
+				// gainNode.gain.value = 1;
+				// source.connect(gainNode);
+				// gainNode.connect(audioContext.destination);
+				source.connect(audioContext.destination);
+				source.start(0);
+			});
+
+			const frequenciesUser = getFrequencies(rawUser);
+			plotFrequencies(frequenciesUser, chart, "User");
+			const SplineArrayUser = getSplineFromArray(frequenciesUser.buffer);
+			plotSpline(SplineArrayUser, chart, "UserSmooth");
 		};
 	</script>
 	
