@@ -8,7 +8,6 @@ function getA(){
 function DTW(modelPitchArr, userPitchArr){
     modelPitchArr = trim(modelPitchArr);
     userPitchArr = trim(userPitchArr);
-	userPitchArr = modify(userPitchArr);
 	var M = new Array();
 	var d = new Array();
 	var parent = new Array();
@@ -94,11 +93,10 @@ function trim(p1){
 }
 
 
-function warp(modelPitchArr, userPitchArr, flag){
+function warp(modelPitchArr, userPitchArr){
 	modelPitchArr = trim(modelPitchArr);
     userPitchArr = trim(userPitchArr);
 	var dtwMap = DTW(userPitchArr, modelPitchArr);
-	userPitchArr = modify(userPitchArr);
 	warpedModel = new Array();
 	warpedUser = new Array();
 	var segment = ModelSegment(modelPitchArr);
@@ -143,9 +141,6 @@ function warp(modelPitchArr, userPitchArr, flag){
 		warpedUser[k] = uAvg/uCount;
 		k++;
 	}
-	if(flag > 0){
-		return SegmentFormat(warpedModel,warpedSeg);
-	}
-	return SegmentFormat(warpedModel,warpedSeg);
+	return {model:SegmentFormat(warpedModel,warpedSeg), user:SegmentFormat(warpedModel,warpedSeg)};
 }
 
