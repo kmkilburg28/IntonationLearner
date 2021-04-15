@@ -6,8 +6,6 @@ function getA(){
 	return a;
 }
 function DTW(modelPitchArr, userPitchArr){
-    modelPitchArr = trim(modelPitchArr);
-    userPitchArr = trim(userPitchArr);
 	var M = new Array();
 	var d = new Array();
 	var parent = new Array();
@@ -88,6 +86,7 @@ function flip(a){
 
 function trim(p1){
     p1Segment = ModelSegment(p1);
+	//console.log(p1Segment[0] + " " + p1Segment[p1Segment.length - 1])
     p1 = p1.slice(p1Segment[0], p1Segment[p1Segment.length - 1] + 1);
 	return p1;
 }
@@ -96,27 +95,30 @@ function trim(p1){
 function warp(modelPitchArr, userPitchArr){
 	modelPitchArr = trim(modelPitchArr);
     userPitchArr = trim(userPitchArr);
-	var dtwMap = DTW(userPitchArr, modelPitchArr);
+	var dtwMap = DTW(modelPitchArr, userPitchArr);
+	console.log(dtwMap);
 	warpedModel = new Array();
 	warpedUser = new Array();
 	var segment = ModelSegment(modelPitchArr);
 	//console.log(segment);
 	var warpedSeg = new Array();
 	var n = dtwMap.length - 1;
+	var modelLen = modelPitchArr.length;
+	var userLen = userPitchArr.length;
 	var i = 0;
 	var j = 0;
 	var k = 0;
 	var segmentIndex = 0;
 	while(i <= n && j <= n){
-		var mAvg = modelPitchArr[i];
-		var uAvg = userPitchArr[j];
+		var mAvg = modelPitchArr[dtwMap[i].x];
+		var uAvg = userPitchArr[dtwMap[j].y];
 		var uCount = 1;
 		var mCount = 1;
 		while((i < n && dtwMap[i].x == dtwMap[i + 1].x) || (j < n && dtwMap[j].y == dtwMap[j + 1].y)){
 			//console.log(i + " " + j);
 			if(dtwMap[j].y == dtwMap[j + 1].y){
 				j++;
-				uAvg += userPitchArr[j];
+				uAvg += userPitchArr[dtwMap[j].y];
 				uCount++;
 				if(j == n){
 					break;
@@ -124,7 +126,7 @@ function warp(modelPitchArr, userPitchArr){
 			}
 			if(dtwMap[i].x == dtwMap[i + 1].x){
 				i++;
-				mAvg += modelPitchArr[i];
+				mAvg += modelPitchArr[dtwMap[i].x];
 				mCount++;
 				if(i == n){
 					break;
@@ -135,12 +137,14 @@ function warp(modelPitchArr, userPitchArr){
 			warpedSeg[segmentIndex] = k;
 			segmentIndex++;
 		}
-		j++;
 		i++;
+		j++;
 		warpedModel[k] = mAvg/mCount;
 		warpedUser[k] = uAvg/uCount;
 		k++;
 	}
-	return {model:SegmentFormat(warpedModel,warpedSeg), user:SegmentFormat(warpedModel,warpedSeg)};
+	console.log(k);
+	console.log(warpedModel, warpedSeg, warpedUser )
+	return {model:SegmentFormat(warpedModel,warpedSeg), user:SegmentFormat(warpedUser,warpedSeg)};
 }
 

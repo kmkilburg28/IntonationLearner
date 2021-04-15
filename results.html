@@ -12,8 +12,11 @@
 	<script src="PitchDetection.js" type="text/javascript"></script>
 	<script src="AudioRecorder.js" type="text/javascript"></script>
 	<script src="ModelSegment.js" type="text/javascript"></script>
+	<script src="Normalization.js" type="text/javascript"></script>
+	<script src="CorrelationMSE.js" type="text/javascript"></script>
 	<script src="SmoothingSpline.js" type="text/javascript"></script>
 	<script src="lz-string.min.js" type="text/javascript"></script>
+    <script src="SegmentFormat.js" type="text/javascript"></script>
     <script src="DTW.js" type="text/javascript"></script>
 </head>
 <body>
@@ -110,8 +113,8 @@
 					scales: {
 						yAxes: [{
 							ticks: {
-								min: 500.0,
-								max: 40.0
+								min: 0.0,
+								max: 1.0
 							}
 						}]
 					},
@@ -143,15 +146,13 @@
 			const audioBuffer = await loadAudioFile(baseURL + filePath);
 			const parsedAudio = parseAudioBuffer(audioBuffer);
 			const frequenciesModel = getFrequencies(parsedAudio);
-			plotFrequencies(frequenciesModel, chart, "Model");
-			const SplineArrayModel = getSplineFromArray(frequenciesModel.buffer);
-			plotSpline(SplineArrayModel, chart, "ModelSmooth");
+			// plotFrequencies(frequenciesModel, chart, "Model");
+			
 
 			const rawUser = stringToRawData(LZString.decompress(localStorage.getItem("userRecording")));
 
 			const playButtonUser = document.getElementById("playUser");
 			playButtonUser.addEventListener('click', () => {
-
 				const audioBuffer = audioContext.createBuffer(
 					1,
 					rawUser.buffer.length,
@@ -168,10 +169,30 @@
 				source.start(0);
 			});
 
-			const frequenciesUser = getFrequencies(rawUser);
-			plotFrequencies(frequenciesUser, chart, "User");
-			const SplineArrayUser = getSplineFromArray(frequenciesUser.buffer);
-			plotSpline(SplineArrayUser, chart, "UserSmooth");
+			const frequenciesUser = getFrequencies(rawUser);			
+
+			const normalizedModel = NormalizeArray(frequenciesModel.buffer);
+			const noramlizedUser  = NormalizeArray(frequenciesUser.buffer);
+			console.log(normalizedModel, noramlizedUser);
+			
+			/** @type {{model, user}} */
+			const segmentedAudio = warp(normalizedModel, noramlizedUser);
+			console.log(segmentedAudio);
+
+			const co = new Float32Array(segmentedAudio.model.length);
+			const mse = new Float32Array(segmentedAudio.model.length);
+			for (let i = 0; i < segmentedAudio.model.length; ++i) {
+				co[i]  = correlationCoe(segmentedAudio.model[i], segmentedAudio.user[i]);
+				mse[i] = MSE(segmentedAudio.model[i], segmentedAudio.user[i]);
+
+				const SplineArrayModel = getSplineFromArray(segmentedAudio.model[i]);
+				plotSpline(SplineArrayModel, chart, "ModelSmooth");
+				const SplineArrayUser = getSplineFromArray(segmentedAudio.model[i]);
+				plotSpline(SplineArrayUser, chart, "UserSmooth");
+			}
+
+
+
 		};
 	</script>
 	
