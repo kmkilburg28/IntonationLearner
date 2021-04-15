@@ -23,6 +23,7 @@
 	<h2>Results</h2>
 	<div>
 		<button onclick="document.location='index.html'">Exit</button>
+		<button onclick="window.location='training.html?modelfile='+localStorage.getItem('modelfile')">Back</button>
 		<button id="playButtonModel">Listen</button>
 		<script>
 			const AudioContext = window.AudioContext || window.webkitAudioContext; 
@@ -100,7 +101,7 @@
 					responsive: true,
 					title: {
 						display: true,
-						text: 'Frequency Graph'
+						text: 'Comparison Graph'
 					},
 					legend: {
 						display: false
@@ -170,8 +171,8 @@
 
 			const frequenciesUser = getFrequencies(rawUser);			
 
-			const normalizedModel = trim(NormalizeArray(frequenciesModel.buffer)).map(value => value == 0 ? -Infinity: value);
-			const noramlizedUser  = trim(NormalizeArray(frequenciesUser.buffer)).map(value => value == 0 ? Infinity: value);
+			const normalizedModel = trim(NormalizeArray(frequenciesModel.buffer)).map(value => value < 0 ? -Infinity: value);
+			const noramlizedUser  = trim(NormalizeArray(frequenciesUser.buffer)).map(value => value < 0 ? Infinity: value);
 			for(let i = 0; i < normalizedModel.length || i < noramlizedUser.length; i++){
 				chart.data.labels[i] = i;
 			}
