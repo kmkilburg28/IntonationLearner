@@ -4,7 +4,6 @@ class AudioRecorder {
 	 * @param {{
 	 * 	onAudioStart: function,
 	 * 	onPermissionsFail: function,
-	 * 	onAudioUpdate: function(Float32Array),
 	 * 	onAudioStop: function(Blob)
 	 * }} callbacks 
 	 */
@@ -95,22 +94,6 @@ class AudioRecorder {
 		this.trackedObjects.mediaRecorder = mediaRecorder;
 
 		return true;
-	}
-
-	/**
-	 * @param {AudioProcessingEvent} e 
-	 */
-	async onAudioUpdate(e) {
-		let audioBuffer = e.inputBuffer;
-		let audioChannel = new Float32Array(new Array(audioBuffer.length));
-		// audioBuffer.copyFromChannel(audioChannel, 0);
-
-		let audioChannelRef = audioBuffer.getChannelData(0);
-		for (let i = 0; i < audioChannel.length; ++i) {
-			audioChannel[i] = audioChannelRef[i];
-		}
-		if (this.callbacks.onAudioUpdate)
-			this.callbacks.onAudioUpdate(audioChannel, audioBuffer.sampleRate);
 	}
 
 	async onDataAvailableRecorder(e) {

@@ -64,27 +64,9 @@
 						pointHoverRadius: 15,
 						showLine: false // no line shown
 					}, {
-						label: 'ModelSmooth',
-						backgroundColor: window.chartColors.blue,
-						borderColor: window.chartColors.blue,
-						data: [],
-						fill: false,
-						pointRadius: 2,
-						pointHoverRadius: 15,
-						showLine: false // no line shown
-					}, {
 						label: 'User',
 						backgroundColor: window.chartColors.blue,
 						borderColor: window.chartColors.blue,
-						data: [],
-						fill: false,
-						pointRadius: 2,
-						pointHoverRadius: 15,
-						showLine: false // no line shown
-					}, {
-						label: 'UserSmooth',
-						backgroundColor: window.chartColors.green,
-						borderColor: window.chartColors.green,
 						data: [],
 						fill: false,
 						pointRadius: 2,
@@ -145,6 +127,10 @@
 			const parsedAudio = parseAudioBuffer(audioBuffer);
 			const frequencies = getFrequencies(parsedAudio);
 			plotFrequencies(frequencies, chart, "Model");
+			chart.data.datasets.map(dataset => {
+				if (dataset.label == "User")
+					dataset.data = (new Array(frequencies.buffer.length)).fill(0);
+			});
 			// const SplineArray = getSplineFromArray(frequencies.buffer);
 			// plotSpline(SplineArray, chart, "ModelSmooth");
 			

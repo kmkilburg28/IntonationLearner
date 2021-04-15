@@ -66,34 +66,61 @@ async function recordAudio(e) {
 					});
 
 					const WINDOW_SIZE = 2048;
-					const INCREMENT = 256;
+					const INCREMENT = 512;
 					// const OVERLAP = WINDOW_SIZE - INCREMENT;
+					const newFrequencesLength = Math.ceil((rawData.buffer.length - WINDOW_SIZE - nextWindowStart) / INCREMENT);
+					const newFrequences = new Float32Array(newFrequencesLength);
+					const FULL_BATCH_SIZE = 4;
+					let batchSize = FULL_BATCH_SIZE < newFrequencesLength ? FULL_BATCH_SIZE : newFrequencesLength;
+					let threadsStarted = 0;
+					let threadsLeft = batchSize;
+					let frequencyInd = 0;
+					console.log(newFrequencesLength);
 					for (/* nextWindowStart */; nextWindowStart < rawData.buffer.length; nextWindowStart += INCREMENT) {
 						if (rawData.buffer.length - nextWindowStart < WINDOW_SIZE) {
 							break;
 						}
-						let strippedRaws = rawData.buffer.slice(nextWindowStart, nextWindowStart + WINDOW_SIZE);
-						let frequency = getFrequency(strippedRaws, rawData.sampleRate, YIN_THRESHOLD_USER);
+						frequencyInd++;
 
-						// Clean frequency
-						if (frequency < LOW_FREQUENCY_THRESHOLD || HIGH_FREQUENCY_THRESHOLD < frequency ||
-							(Math.abs(frequency - lastFrequency) > JUMP_THRESHOLD && (frequencesData.length - 1) - lastFrequencyTime < JUMP_TIME_LIMIT)) {
-							frequency = 0;
-							--lastFrequencyTime;
-						}
-						else {
-							lastFrequencyTime = frequencesData.length - 1;
-							lastFrequency = frequency;
-						}
+						let frequencyThread = async (freqInd, start, end, sampleRate) => {
+							let strippedRaws = rawData.buffer.slice(start, end);
+							let frequency = getFrequency(strippedRaws, sampleRate, YIN_THRESHOLD_USER);
+							newFrequences[freqInd] = frequency;
+							threadsLeft--;
+						};
 
-						if (frequency != 0 || frequencesData.length > 0) {
-							frequencesData.push(frequency);
-							if (frequencesData.length > chart.data.labels.length)
-								frequencesData.shift();
+						frequencyThread(frequencyInd, nextWindowStart, nextWindowStart + WINDOW_SIZE, rawData.sampleRate);
+						threadsStarted++;
+
+						if (threadsStarted == batchSize) {
+							for (let i = batchSize; i < frequencesData.length; ++i) {
+								frequencesData[i-batchSize-1] = frequencesData[i];
+							}
+							threadsStarted = 0;
+							while (threadsLeft > 0) {console.log(threadsLeft + " threads left")}
+
+							for (let i = 0; i < batchSize; ++i) {
+
+								let frequency = newFrequences[frequencyInd-batchSize+i];
+								// Clean frequency
+								if (frequency < LOW_FREQUENCY_THRESHOLD || HIGH_FREQUENCY_THRESHOLD < frequency ||
+									(Math.abs(frequency - lastFrequency) > JUMP_THRESHOLD && (frequencesData.length - 1) - lastFrequencyTime < JUMP_TIME_LIMIT)) {
+									frequency = 0;
+									--lastFrequencyTime;
+								}
+								else {
+									lastFrequencyTime = frequencesData.length - 1;
+									lastFrequency = frequency;
+								}
+								frequencesData[frequencesData.length-batchSize+i-1] = frequency;
+								frequencesData[frequencesData.length-batchSize+i] = frequency;
+							}
+
+							batchSize = FULL_BATCH_SIZE < newFrequencesLength - frequencyInd ? FULL_BATCH_SIZE : newFrequencesLength - frequencyInd;
+							threadsLeft = batchSize;
+							console.log("Batch: ", frequencyInd / FULL_BATCH_SIZE);
+							(async () => chart.update())();
 						}
-						console.log(frequency);
-						if (nextWindowStart % WINDOW_SIZE == 0)
-							chart.update();
 					}
 					// let SplineArray = getSplineFromArray(frequencesData);
 					// plotSpline(SplineArray, chart, "UserSmooth");
