@@ -41,6 +41,8 @@ async function recordAudio(e) {
 	const LOW_FREQUENCY_THRESHOLD = 50;
 	const HIGH_FREQUENCY_THRESHOLD = 500;
 
+	let nextWindowStart = 0;
+
 	const audioRecorder = new AudioRecorder({
 		onAudioStart: () => {
 			audioControl.removeEventListener('click', recordAudio);
@@ -49,65 +51,54 @@ async function recordAudio(e) {
 			});
 			audioControl.textContent = "Stop Recording";
 		},
-		onAudioUpdate: (audioData, sampleRate) => {
+		onDataAvailable: (audioBlob) => {
+			let fileReader = new FileReader();
+			fileReader.onloadend = () => {
+				let arrayBuffer = fileReader.result;
+				audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+					let rawData = parseAudioBuffer(audioBuffer);
+				
+					let frequencesData;
+					chart.data.datasets.forEach((dataset) => {
+						if (dataset.label == "User") {
+							frequencesData = dataset.data;
+						}
+					});
 
-			// console.log(audioData)
-			let frequencesData;
-			chart.data.datasets.forEach((dataset) => {
-				if (dataset.label == "User") {
-					frequencesData = dataset.data;
-				}
-			});
+					const WINDOW_SIZE = 2048;
+					const INCREMENT = 256;
+					// const OVERLAP = WINDOW_SIZE - INCREMENT;
+					for (nextWindowStart = nextWindowStart; nextWindowStart < rawData.buffer.length; nextWindowStart += INCREMENT) {
+						if (rawData.buffer.length - nextWindowStart < WINDOW_SIZE) {
+							break;
+						}
+						let strippedRaws = rawData.buffer.slice(nextWindowStart, nextWindowStart + WINDOW_SIZE);
+						let frequency = getFrequency(strippedRaws, rawData.sampleRate, YIN_THRESHOLD_USER);
 
-			let lastSampleCpy = lastSample.slice();
-			lastSample = audioData;
+						// Clean frequency
+						if (frequency < LOW_FREQUENCY_THRESHOLD || HIGH_FREQUENCY_THRESHOLD < frequency ||
+							(Math.abs(frequency - lastFrequency) > JUMP_THRESHOLD && (frequencesData.length - 1) - lastFrequencyTime < JUMP_TIME_LIMIT)) {
+							frequency = 0;
+							--lastFrequencyTime;
+						}
+						else {
+							lastFrequencyTime = frequencesData.length - 1;
+							lastFrequency = frequency;
+						}
 
-			const WINDOW_SIZE = 2048;
-			const INCREMENT = 256;
-			const OVERLAP = WINDOW_SIZE - INCREMENT;
-			for (let i = INCREMENT; i <= WINDOW_SIZE; i += INCREMENT) {
-				let oldSection = lastSampleCpy.subarray(i);
-				// let oldSection = lastSample.subarray(i);
-				let newSection = audioData.subarray(0, i);
-				console.log(i, oldSection.length, newSection.length);
-				let joinedSection = new Float32Array(WINDOW_SIZE);
-				joinedSection.set(oldSection);
-				joinedSection.set(newSection, oldSection.length);
-				let frequency = getFrequency(joinedSection, sampleRate, YIN_THRESHOLD_USER);
-
-				// Clean frequency
-				if (frequency < LOW_FREQUENCY_THRESHOLD || HIGH_FREQUENCY_THRESHOLD < frequency ||
-					(Math.abs(frequency - lastFrequency) > JUMP_THRESHOLD && (frequencesData.length - 1) - lastFrequencyTime < JUMP_TIME_LIMIT)) {
-					frequency = 0;
-					--lastFrequencyTime;
-				}
-				else {
-					lastFrequencyTime = frequencesData.length - 1;
-					lastFrequency = frequency;
-				}
-
-				frequencesData.push(frequency);
-				if (frequencesData.length > chart.data.labels.length)
-					frequencesData.shift();
-				chart.update();
+						if (frequency != 0 || frequencesData.length > 0) {
+							frequencesData.push(frequency);
+							if (frequencesData.length > chart.data.labels.length)
+								frequencesData.shift();
+						}
+						if (nextWindowStart % WINDOW_SIZE == 0)
+							chart.update();
+					}
+					// let SplineArray = getSplineFromArray(frequencesData);
+					// plotSpline(SplineArray, chart, "UserSmooth");
+				});
 			}
-
-			// for (let i = 0; i <= audioData.length-WINDOW_SIZE; i += INCREMENT) {
-			// 	let subSection = audioData.subarray(i, i+WINDOW_SIZE);
-			// 	let frequency = getFrequency(subSection, sampleRate);
-			// 	frequencesData.push(frequency);
-			// 	if (frequencesData.length > chart.data.labels.length)
-			// 		frequencesData.shift();
-			// }
-
-			// let frequency = getFrequency(audioData, sampleRate, YIN_THRESHOLD_USER);
-			// frequencesData.push(frequency);
-			// if (frequencesData.length > chart.data.labels.length)
-			// 	frequencesData.shift();
-
-
-			let SplineArray = getSplineFromArray(frequencesData);
-			plotSpline(SplineArray, chart, "UserSmooth");
+			fileReader.readAsArrayBuffer(audioBlob);
 		},
 		onAudioStop: (audioBlob) => {
 			audioControl.textContent = "Reset";
@@ -118,7 +109,7 @@ async function recordAudio(e) {
 			if (!continueButton) {
 				continueButton = document.createElement("button");
 				continueButton.textContent = "Continue";
-				continueButton.addEventListener('click', () => document.location='evaluation.html');
+				continueButton.addEventListener('click', () => document.location='results.html');
 				audioControl.parentElement.appendChild(continueButton);
 			}
 
@@ -141,14 +132,6 @@ async function recordAudio(e) {
 			const params = new URLSearchParams(window.location.search);
 			localStorage.removeItem('modelfile');
 			localStorage.setItem('modelfile', params.get('modelfile'));
-			let audioUrl;
-			try {
-				audioUrl = webkitURL.createObjectURL(audioBlob);
-			}
-			catch(err) { // Firefox
-				audioUrl = URL.createObjectURL(audioBlob);
-			}
-			console.log(audioUrl);
 		},
 		onPermissionsFail: () => {
 			let childNodes = audioControl.parentNode.childNodes;

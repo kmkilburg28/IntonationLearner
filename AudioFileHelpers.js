@@ -79,16 +79,13 @@ function stringToRawData(rawDataString) {
 function plotFrequencies(frequencyData, chart, datasetLabel) {
 	chart.data.datasets.forEach((dataset) => {
 		if (dataset.label == datasetLabel) {
-			console.log(frequencyData);
 			dataset.data = new Array(frequencyData.buffer.length);
-			console.log(dataset.data)
 			for (let i = 0; i < frequencyData.buffer.length; ++i) {
 				dataset.data[i] = frequencyData.buffer[i];
 				if (chart.data.labels.length <= i) {
 					chart.data.labels[i] = i;
 				}
 			}
-			console.log(dataset.data)
 		}
 	});
 	chart.update();
@@ -100,21 +97,23 @@ function plotFrequencies(frequencyData, chart, datasetLabel) {
  * @param {string} datasetLabel
  */
  function plotSpline(S, chart, datasetLabel) {
-	chart.data.datasets.forEach((dataset) => {
-		if (dataset.label == datasetLabel) {
-			dataset.data = new Array(S.length);
-			const STEP_SIZE = 1;
-			let i = 0;
-			for (let t  = 0; t < S[S.length-1].x; t += STEP_SIZE) {
-				if (i < S.length - 1 && S[i+1].x < t)
-					i = i + 1;
-				if (i > 0) {
-					chart.data.labels[t] = t;
-					let y = S[i].evaluate(t);
-					dataset.data[t] = y;
+	if (S.length > 0) {
+		chart.data.datasets.forEach((dataset) => {
+			if (dataset.label == datasetLabel) {
+				dataset.data = new Array(S.length);
+				const STEP_SIZE = 1;
+				let i = 0;
+				for (let t  = 0; t < S[S.length-1].x; t += STEP_SIZE) {
+					if (i < S.length - 1 && S[i+1].x < t)
+						i = i + 1;
+					if (i > 0) {
+						chart.data.labels[t] = t;
+						let y = S[i].evaluate(t);
+						dataset.data[t] = y;
+					}
 				}
 			}
-		}
-	});
-	chart.update();
+		});
+		chart.update();
+	}
 }

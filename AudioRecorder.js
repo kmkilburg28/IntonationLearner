@@ -15,14 +15,15 @@ class AudioRecorder {
 		 * @type {{
 		 * 	stream: MediaStream,
 		 * 	processor: ScriptProcessorNode,
-		 * 	mediaRecorder: MediaRecorder
+		 * 	mediaRecorder: MediaRecorder,
+		 * 	interval: number
 		 * }}
 		 */
 		this.trackedObjects = {
-			stream: undefined,
-			processor: undefined,
-			mediaRecorder: undefined
+			mediaRecorder: undefined,
+			interval: undefined
 		};
+		this.INTERVAL_TIMER = 100;
 	}
 
 	/**
@@ -44,15 +45,10 @@ class AudioRecorder {
 	}
 
 	async stop() {
+		if (this.trackedObjects.interval)
+			clearInterval(this.trackedObjects.interval);
 		if (this.trackedObjects.mediaRecorder)
 			this.trackedObjects.mediaRecorder.stop();
-		if (this.trackedObjects.stream) {
-			this.trackedObjects.stream.getAudioTracks().forEach((track) => {
-				track.stop();
-			});
-		}
-		if (this.trackedObjects.processor)
-			this.trackedObjects.processor.disconnect();
 	}
 
 
@@ -85,26 +81,17 @@ class AudioRecorder {
 		this.trackedObjects.stream = stream;
 	}
 	async startRecordings(stream) {
-		const AudioContext = window.AudioContext || window.webkitAudioContext; 
-		const audioContext = new AudioContext();
-		const source = audioContext.createMediaStreamSource(stream);
-		const gainNode = audioContext.createGain();
-		gainNode.gain.value = 8;
-		source.connect(gainNode);
-		const WINDOW_SIZE = 2048; // 2048 - down to 43 Hz; 1024 - down to 86 Hz
-		const processor = audioContext.createScriptProcessor(WINDOW_SIZE, 1, 1);
-		processor.onaudioprocess = (e) => this.onAudioUpdate(e);
-	
 		/** @type{MediaRecorder} */
 		const mediaRecorder = await new MediaRecorder(stream);			
 		mediaRecorder.addEventListener("dataavailable", (e) => this.onDataAvailableRecorder(e));
 		mediaRecorder.addEventListener("stop", (e) => this.onStopMediaRecorder(e));
 
-		source.connect(processor);
-		processor.connect(audioContext.destination);
 		mediaRecorder.start();
+
+		this.trackedObjects.interval = setInterval(() => {
+			this.trackedObjects.mediaRecorder.requestData();
+		}, this.INTERVAL_TIMER);
 		
-		this.trackedObjects.processor = processor;
 		this.trackedObjects.mediaRecorder = mediaRecorder;
 
 		return true;
@@ -128,6 +115,10 @@ class AudioRecorder {
 
 	async onDataAvailableRecorder(e) {
 		this.audioBlobs.push(e.data); // push audio Blob
+		if (this.callbacks.onDataAvailable) {
+			const audioBlob = new Blob(this.audioBlobs, { type : 'audio/wav; codecs=0' });
+			this.callbacks.onDataAvailable(audioBlob);
+		}
 	}
 	async onStopMediaRecorder(e) {
 		const audioBlob = new Blob(this.audioBlobs, { type : 'audio/wav; codecs=0' });

@@ -97,9 +97,6 @@ function SmoothingSpline(S, sigma, lambda, n) {
  */
 function Quincunx(n, u, v, w, q) {
 
-	console.log(u[0], u[1],
-				v[0], v[1],
-				w[0], w[1]);
 	u[0] = 0;
 	// u[1] = u[1];
 
@@ -142,9 +139,12 @@ function getSplineFromArray(buffer, THRESHOLD=47) {
 			SplineArray.push(new Spline(i, buffer[i]));
 		}
 	}
-	const sigma = (new Uint8Array(SplineArray.length)).fill(1);
-	// SmoothingSpline(SplineArray, sigma, 0.001, SplineArray.length - 1);
-	SmoothingSpline(SplineArray, sigma, 0.95, SplineArray.length - 1);
-	// SmoothingSpline(SplineArray, sigma, 1, SplineArray.length - 1);
-	return SplineArray;
+	if (SplineArray.length > 1) {
+		const sigma = (new Uint8Array(SplineArray.length)).fill(1);
+		// SmoothingSpline(SplineArray, sigma, 0.001, SplineArray.length - 1);
+		SmoothingSpline(SplineArray, sigma, 0.95, SplineArray.length - 1);
+		// SmoothingSpline(SplineArray, sigma, 1, SplineArray.length - 1);
+		return SplineArray;
+	}
+	return [];
 }
