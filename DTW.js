@@ -143,8 +143,8 @@ function warp(modelPitchArr, userPitchArr){
 		k++;
 	}
 	//console.log(k);
-	//console.log(warpedModel, warpedSeg, warpedUser )
-	console.log(userPitchArr);
+	//console.log(warpedModel, warpedSeg, warpedUser)
+	//console.log(userPitchArr);
 	return {model:SegmentFormat(warpedModel,warpedSeg), user:SegmentFormat(warpedUser,warpedSeg), userSeg:userSegment, modelSeg:segment};
 }
 

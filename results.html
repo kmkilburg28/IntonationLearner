@@ -184,15 +184,26 @@
 			const co = new Float32Array(segmentedAudio.model.length);
 			const mse = new Float32Array(segmentedAudio.model.length);
 			for (let i = 0; i < segmentedAudio.model.length; ++i) {
-				co[i]  = correlationCoe(segmentedAudio.model[i], segmentedAudio.user[i]);
+				
 				mse[i] = MSE(segmentedAudio.model[i], segmentedAudio.user[i]);
 
 				const SplineArrayModel = getSplineFromArray(segmentedAudio.model[i]);
-				//plotSpline(SplineArrayModel, chart, "ModelSmooth");
+				//console.log(SplineArrayModel);
+
+				let lastRealIndex = 0;
+				for (let x = 0; x < segmentedAudio.model[i].length; x++) {
+					if(!isFinite(segmentedAudio.model[i][x])){
+						segmentedAudio.model[i][x] = SplineArrayModel[lastRealIndex].evaluate(x);
+					}else{
+						lastRealIndex++;
+					}
+				}
+				console.log(segmentedAudio.model[i]);
+				co[i]  = correlationCoe(segmentedAudio.model[i], segmentedAudio.user[i]);
 				const SplineArrayUser = getSplineFromArray(segmentedAudio.model[i]);
 				//plotSpline(SplineArrayUser, chart, "UserSmooth");
 			}
-
+			console.log(co, mse);
 
 
 		};

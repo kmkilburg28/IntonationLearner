@@ -1,11 +1,18 @@
 function correlationCoe(pitchArr, userPitchArr) {
 	var modelAvg = 0;
+
 	for (var i = 0; i < pitchArr.length; i++) {
+		if(pitchArr[i] < 0){
+			pitchArr[i] = 0;
+		}
 		modelAvg += pitchArr[i];
 	}
 	modelAvg /= pitchArr.length;
 	var userAvg = 0;
 	for (var i = 0; i < userPitchArr.length; i++) {
+		if(userPitchArr[i] < 0){
+			userPitchArr[i] = 0;
+		}
 		userAvg += userPitchArr[i];
 	}
 	userAvg /= userPitchArr.length;

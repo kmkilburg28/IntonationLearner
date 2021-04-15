@@ -135,7 +135,7 @@ function Quincunx(n, u, v, w, q) {
 function getSplineFromArray(buffer, THRESHOLD=47) {
 	let SplineArray = [];
 	for (let i = 0; i < buffer.length; ++i) {
-		if (buffer[i] > THRESHOLD) {
+		if (isFinite(buffer[i]) ) {
 			SplineArray.push(new Spline(i, buffer[i]));
 		}
 	}

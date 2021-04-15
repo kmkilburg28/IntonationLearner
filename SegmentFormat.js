@@ -1,4 +1,5 @@
 function SegmentFormat(pitchArr, segmentArr) {
+	console.log(pitchArr);
 	var retArr = new Array();
 	var index = 0;
 	for (var i = 0; i < segmentArr.length; i += 2) {
@@ -8,5 +9,6 @@ function SegmentFormat(pitchArr, segmentArr) {
 		}
 		index++;
 	}
+	console.log(retArr);
 	return retArr;
 }
