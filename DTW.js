@@ -98,11 +98,11 @@ function warp(modelPitchArr, userPitchArr){
 	warpedModel = new Array();
 	warpedUser = new Array();
 	var segment = ModelSegment(modelPitchArr);
+	var userSegment = new Array();
 	//console.log(segment);
 	var warpedSeg = new Array();
 	var n = dtwMap.length - 1;
-	var modelLen = modelPitchArr.length;
-	var userLen = userPitchArr.length;
+
 	var i = 0;
 	var j = 0;
 	var k = 0;
@@ -132,6 +132,7 @@ function warp(modelPitchArr, userPitchArr){
 			}
 		}
 		if(i >= segment[segmentIndex]){
+			userSegment[segmentIndex] = dtwMap[j].y; 
 			warpedSeg[segmentIndex] = k;
 			segmentIndex++;
 		}
@@ -143,6 +144,7 @@ function warp(modelPitchArr, userPitchArr){
 	}
 	//console.log(k);
 	//console.log(warpedModel, warpedSeg, warpedUser )
-	return {model:SegmentFormat(warpedModel,warpedSeg), user:SegmentFormat(warpedUser,warpedSeg)};
+	console.log(userPitchArr);
+	return {model:SegmentFormat(warpedModel,warpedSeg), user:SegmentFormat(warpedUser,warpedSeg), userSeg:userSegment, modelSeg:segment};
 }
 
