@@ -91,6 +91,7 @@ async function recordAudio(e) {
 							if (frequencesData.length > chart.data.labels.length)
 								frequencesData.shift();
 						}
+						console.log(frequency);
 						if (nextWindowStart % WINDOW_SIZE == 0)
 							chart.update();
 					}

@@ -150,7 +150,6 @@
 			
 
 			const rawUser = stringToRawData(LZString.decompress(localStorage.getItem("userRecording")));
-
 			const playButtonUser = document.getElementById("playUser");
 			playButtonUser.addEventListener('click', () => {
 				const audioBuffer = audioContext.createBuffer(
@@ -173,11 +172,9 @@
 
 			const normalizedModel = NormalizeArray(frequenciesModel.buffer);
 			const noramlizedUser  = NormalizeArray(frequenciesUser.buffer);
-			console.log(normalizedModel, noramlizedUser);
 			
 			/** @type {{model, user}} */
 			const segmentedAudio = warp(normalizedModel, noramlizedUser);
-			console.log(segmentedAudio);
 
 			const co = new Float32Array(segmentedAudio.model.length);
 			const mse = new Float32Array(segmentedAudio.model.length);

@@ -33,9 +33,6 @@ function DTW(modelPitchArr, userPitchArr){
 	for(var i = 1; i < userPitchArr.length; i++){
 		for(var j = 1; j < modelPitchArr.length; j++){
 			var min;
-			if(i == 3 && j == 1){
-				console.log(M[i - 1][j - 1] + " " +  M[i][j - 1] + " " + M[i - 1][j])
-			}
 			if(M[i - 1][j - 1] <= M[i][j - 1] && M[i - 1][j - 1] <= M[i - 1][j]){
 				min = M[i - 1][j - 1];
 				parent[i][j] = {x:i-1,y:j-1};
@@ -93,10 +90,11 @@ function trim(p1){
 
 
 function warp(modelPitchArr, userPitchArr){
+	//console.log(modelPitchArr, userPitchArr);
 	modelPitchArr = trim(modelPitchArr);
     userPitchArr = trim(userPitchArr);
 	var dtwMap = DTW(modelPitchArr, userPitchArr);
-	console.log(dtwMap);
+	//console.log(dtwMap);
 	warpedModel = new Array();
 	warpedUser = new Array();
 	var segment = ModelSegment(modelPitchArr);
@@ -143,8 +141,8 @@ function warp(modelPitchArr, userPitchArr){
 		warpedUser[k] = uAvg/uCount;
 		k++;
 	}
-	console.log(k);
-	console.log(warpedModel, warpedSeg, warpedUser )
+	//console.log(k);
+	//console.log(warpedModel, warpedSeg, warpedUser )
 	return {model:SegmentFormat(warpedModel,warpedSeg), user:SegmentFormat(warpedUser,warpedSeg)};
 }
 

@@ -23,6 +23,9 @@ function getFrequencies(rawData, WINDOW_SIZE=2048, OVERLAP=2048-256, YIN_THRESHO
 		const startInd = i*INCREMENT;
 		const windowed = buffer.subarray(startInd, startInd + WINDOW_SIZE);
 		frequencies[i] = getFrequency(windowed, rawData.sampleRate, YIN_THRESHOLD);
+		if(isNaN(frequencies[i])){
+			frequencies[i] = 0;
+		}
 	}
 	return new FrequencyData(
 		cleanFrequencies(frequencies),
