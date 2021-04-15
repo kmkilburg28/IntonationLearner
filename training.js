@@ -68,7 +68,7 @@ async function recordAudio(e) {
 					const WINDOW_SIZE = 2048;
 					const INCREMENT = 256;
 					// const OVERLAP = WINDOW_SIZE - INCREMENT;
-					for (nextWindowStart = nextWindowStart; nextWindowStart < rawData.buffer.length; nextWindowStart += INCREMENT) {
+					for (/* nextWindowStart */; nextWindowStart < rawData.buffer.length; nextWindowStart += INCREMENT) {
 						if (rawData.buffer.length - nextWindowStart < WINDOW_SIZE) {
 							break;
 						}

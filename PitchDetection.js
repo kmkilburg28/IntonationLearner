@@ -45,7 +45,7 @@ function cleanFrequencies(frequencies) {
 	const HIGH_FREQUENCY_THRESHOLD = 500;
 	let lastValueTime = 0;
 	let lastValue = frequencies[lastValueTime];
-	while (lastValue < LOW_FREQUENCY_THRESHOLD && lastValueTime < frequencies.length) {
+	while ((lastValue < LOW_FREQUENCY_THRESHOLD || HIGH_FREQUENCY_THRESHOLD < lastValue) && lastValueTime < frequencies.length) {
 		frequencies[lastValueTime] = 0;
 		lastValue = frequencies[++lastValueTime];
 	}
