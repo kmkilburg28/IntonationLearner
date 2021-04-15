@@ -181,7 +181,6 @@
 			chart.update();
 			/** @type {{model, user}} */
 			const segmentedAudio = warp(normalizedModel, noramlizedUser);
-			console.log(segmentedAudio);
 			const co = new Float32Array(segmentedAudio.model.length);
 			const mse = new Float32Array(segmentedAudio.model.length);
 			for (let i = 0; i < segmentedAudio.model.length; ++i) {
@@ -199,9 +198,18 @@
 						lastRealIndex++;
 					}
 				}
-				console.log(segmentedAudio.model[i]);
+				const SplineArrayUser = getSplineFromArray(segmentedAudio.user[i]);
+				console.log(SplineArrayUser);
+				lastRealIndex = 0;
+				for (let x = 0; x < segmentedAudio.user[i].length; x++) {
+					if(!isFinite(segmentedAudio.user[i][x])){
+						segmentedAudio.user[i][x] = SplineArrayUser[lastRealIndex].evaluate(x);
+					}else{
+						lastRealIndex++;
+					}
+				}
 				co[i]  = correlationCoe(segmentedAudio.model[i], segmentedAudio.user[i]);
-				const SplineArrayUser = getSplineFromArray(segmentedAudio.model[i]);
+				
 				//plotSpline(SplineArrayUser, chart, "UserSmooth");
 			}
 			console.log(co, mse);
