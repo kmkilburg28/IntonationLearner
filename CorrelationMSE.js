@@ -34,16 +34,19 @@ function correlationCoe(pitchArr, userPitchArr) {
 	return nume / denom;
 }
 
-function MSE(pitchArr, userPitchArr){
-	var ret = 0;
-	for (var i = 0; i < userPitchArr.length; i++) {
-		if(!isReal(pitchArr[i])){
-			pitchArr[i] = 0;
+function MSE(array1, array2) {
+
+	let ret = 0;
+	for (let i = 0; i < array1.length; i++) {
+		let value1 = array1[i];
+		if (!isReal(value1)) {
+			value1 = 0;
 		}
-		if(!isReal(userPitchArr[i])){
-			userPitchArr[i] = 0;
+		let value2 = array2[i];
+		if (!isReal(value2)) {
+			value2 = 0;
 		}
-		ret += (pitchArr[i] - userPitchArr[i]) * (pitchArr[i] - userPitchArr[i]);
+		ret += Math.pow(value1[i] - value2[i], 2);
 	}
-	return ret / userPitchArr.length;
+	return ret / array1.length;
 }

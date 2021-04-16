@@ -128,23 +128,41 @@ function Quincunx(n, u, v, w, q) {
 }
 
 /**
- * @param {number[]} buffer 
- * @param {number} THRESHOLD
+ * @param {number[]} array 
+ * @param {number} roughnessFactor
  * @returns {Spline[]}
  */
-function getSplineFromArray(buffer, THRESHOLD=47) {
+function getSplineFromArray(array, roughnessFactor=0.01) {
 	let SplineArray = [];
-	for (let i = 0; i < buffer.length; ++i) {
-		if (isFinite(buffer[i]) ) {
-			SplineArray.push(new Spline(i, buffer[i]));
+	for (let i = 0; i < array.length; ++i) {
+		if (isReal(array[i])) {
+			SplineArray.push(new Spline(i, array[i]));
 		}
 	}
 	if (SplineArray.length > 1) {
 		const sigma = (new Uint8Array(SplineArray.length)).fill(1);
-		// SmoothingSpline(SplineArray, sigma, 0.001, SplineArray.length - 1);
-		SmoothingSpline(SplineArray, sigma, 0.95, SplineArray.length - 1);
-		// SmoothingSpline(SplineArray, sigma, 1, SplineArray.length - 1);
+		SmoothingSpline(SplineArray, sigma, roughnessFactor, SplineArray.length - 1);
 		return SplineArray;
 	}
 	return [];
+}
+
+/**
+ * @param {Spline[]} S spline array
+ * @param {number} start 
+ * @param {number} end 
+ * @returns {Float32Array}
+ */
+function evaluateSplineArray(S, start, end, interval=1) {
+	let y = new Float32Array(Math.floor((end - start) / interval));
+	let yLen = 0;
+	let i = 0;
+	for (let x = start; x < end; x += interval) {
+		if (i < S.length - 1 && S[i+1].x < x)
+			i = i + 1;
+		if (i > 0) {
+			y[yLen++] = S[i].evaluate(x);
+		}
+	}
+	return y;
 }

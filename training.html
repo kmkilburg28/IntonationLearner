@@ -126,7 +126,7 @@
 			const audioBuffer = await loadAudioFile(baseURL + filePath);
 			const parsedAudio = parseAudioBuffer(audioBuffer);
 			const frequencies = getFrequencies(parsedAudio);
-			plotFrequencies(frequencies, chart, "Model");
+			plotArray(frequencies.buffer, chart, "Model");
 			chart.data.datasets.map(dataset => {
 				if (dataset.label == "User")
 					dataset.data = (new Array(frequencies.buffer.length)).fill(0);

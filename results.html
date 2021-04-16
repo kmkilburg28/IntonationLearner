@@ -17,6 +17,7 @@
 	<script src="SmoothingSpline.js" type="text/javascript"></script>
 	<script src="lz-string.min.js" type="text/javascript"></script>
     <script src="SegmentFormat.js" type="text/javascript"></script>
+    <script src="Trial.js" type="text/javascript"></script>
     <script src="DTW.js" type="text/javascript"></script>
 </head>
 <body>
@@ -129,17 +130,17 @@
 		}
 
 		window.onload = async function() {
-			var container = document.querySelector('.container');
+			const container = document.querySelector('.container');
 
-			var div = document.createElement('div');
+			let div = document.createElement('div');
 			div.classList.add('chart-container');
 
-			var canvas = document.createElement('canvas');
+			let canvas = document.createElement('canvas');
 			div.appendChild(canvas);
 			container.appendChild(div);
 
-			var ctx = canvas.getContext('2d');
-			var config = createConfig('circle');
+			let ctx = canvas.getContext('2d');
+			let config = createConfig('circle');
 			const chart = new Chart(ctx, config);
 
 
@@ -147,7 +148,6 @@
 			const audioBuffer = await loadAudioFile(baseURL + filePath);
 			const parsedAudio = parseAudioBuffer(audioBuffer);
 			const frequenciesModel = getFrequencies(parsedAudio);
-			// plotFrequencies(frequenciesModel, chart, "Model");
 			
 
 			const rawUser = stringToRawData(LZString.decompress(localStorage.getItem("userRecording")));
@@ -170,67 +170,44 @@
 			});
 
 			const frequenciesUser = getFrequencies(rawUser);			
-			let nm = trim(NormalizeArray(frequenciesModel.buffer)).map(value => value < 0 ? -1: value);
+			// let nm = trim(NormalizeArray(frequenciesModel.buffer)).map(value => value < 0 ? -1 : value);
+			let nm = trim(NormalizeArray(frequenciesModel.buffer));
 			// for(let i = 1; i < nm.length;i++){
 			// 	if(!isReal(nm[i])){
 			// 		nm[i] = nm[i - 1];
 			// 	}
 			// }
-			let nu = trim(NormalizeArray(frequenciesUser.buffer)).map(value => value < 0 ? 1.1: value);
+			let nu = trim(NormalizeArray(frequenciesUser.buffer));
 			// for(let i = 1; i < nu.length;i++){
 			// 	if(!isReal(nu[i])){
 			// 		nu[i] = nu[i - 1];
 			// 	}
 			// }
-			nu = nu.length < nm.length ? NormalizeTime(nu,nm):nu;
-			nm = nu.length < nm.length ? nm : NormalizeTime(nu,nm);
+			nu = nu.length < nm.length ? NormalizeTime(nu, nm) : nu;
+			nm = nu.length < nm.length ? nm : NormalizeTime(nu, nm);
 			const normalizedModel = nm;
-			const noramlizedUser  = nu;
-			for(let i = 0; i < normalizedModel.length || i < noramlizedUser.length; i++){
+			const normalizedUser  = nu;
+			for (let i = 0; i < normalizedModel.length || i < normalizedUser.length; ++i){
 				chart.data.labels[i] = i;
 			}
-			chart.data.datasets[0].data = normalizedModel;
-			chart.data.datasets[1].data = noramlizedUser;
-			chart.update();
-			const mse = MSE(normalizedModel, noramlizedUser);
-			const co = correlationCoe(noramlizedUser,normalizedModel);
-			/** @type {{model, user}} */
-			// const segmentedAudio = warp(normalizedModel, noramlizedUser);
-			// console.log(segmentedAudio);
-			// const co = new Float32Array(segmentedAudio.model.length);
-			// const mse = new Float32Array(segmentedAudio.model.length);
-			// for (let i = 0; i < segmentedAudio.model.length; ++i) {
-				
-			// 	mse[i] = MSE(segmentedAudio.model[i], segmentedAudio.user[i]);
+			plotArray(normalizedModel, chart, "Model");
+			plotArray(normalizedUser,  chart, "User");
 
-			// 	const SplineArrayModel = getSplineFromArray(segmentedAudio.model[i]);
-			// 	//console.log(SplineArrayModel);
+			const SplineArrayModel = getSplineFromArray(normalizedModel, 0.01);
+			const smoothedModel = evaluateSplineArray(SplineArrayModel, 0, normalizedModel.length);
+			// plotArray(smoothedModel, chart, "ModelSmooth");
+			const SplineArrayUser = getSplineFromArray(normalizedUser, 0.01);
+			const smoothedUser = evaluateSplineArray(SplineArrayUser, 0, normalizedUser.length);
+			// plotArray(smoothedUser, chart, "UserSmooth");
 
-			// 	let lastRealIndex = 0;
-			// 	for (let x = 0; x < segmentedAudio.model[i].length; x++) {
-			// 		if(!isReal(segmentedAudio.model[i][x])){
-			// 			segmentedAudio.model[i][x] = SplineArrayModel[lastRealIndex].evaluate(x);
-			// 		}else{
-			// 			lastRealIndex++;
-			// 		}
-			// 	}
-			// 	const SplineArrayUser = getSplineFromArray(segmentedAudio.user[i]);
-			// 	//console.log(SplineArrayUser);
-			// 	lastRealIndex = 0;
-			// 	for (let x = 0; x < segmentedAudio.user[i].length; x++) {
-			// 		if(!isReal(segmentedAudio.user[i][x])){
-			// 			segmentedAudio.user[i][x] = SplineArrayUser[lastRealIndex].evaluate(x);
-			// 		}else{
-			// 			lastRealIndex++;
-			// 		}
-			// 	}
-			// 	co[i]  = correlationCoe(segmentedAudio.model[i], segmentedAudio.user[i]);
-				
-			// 	//plotSpline(SplineArrayUser, chart, "UserSmooth");
-			// }
+			/** @type {number} */
+			const co = correlationCoe(smoothedUser, smoothedModel);
+			const mse = MSE(smoothedModel, smoothedUser);
+
+			attemptCreateTrial(co, mse);
+
+
 			console.log(co, mse);
-
-
 		};
 	</script>
 	

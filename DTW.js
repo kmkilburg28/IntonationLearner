@@ -1,8 +1,5 @@
 function isReal(num){
-	if(num < 0 || num > 1){
-		return false;
-	}
-	return true;
+	return 0 <= num && num <= 1;
 }
 
 
@@ -86,7 +83,6 @@ function flip(a){
 
 function trim(p1){
     p1Segment = ModelSegment(p1);
-	//console.log(p1Segment[0] + " " + p1Segment[p1Segment.length - 1])
     p1 = p1.slice(p1Segment[0], p1Segment[p1Segment.length - 1] + 1);
 	return p1;
 }

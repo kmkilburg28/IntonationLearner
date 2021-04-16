@@ -137,7 +137,13 @@ async function recordAudio(e) {
 			if (!continueButton) {
 				continueButton = document.createElement("button");
 				continueButton.textContent = "Continue";
-				continueButton.addEventListener('click', () => document.location='results.html');
+				continueButton.addEventListener('click', () => {
+					let lastTrialId = localStorage.getItem('lastTrialId');
+					if (lastTrialId == null)
+						lastTrialId = 0;
+					localStorage.setItem('lastTrialId', parseInt(lastTrialId) + 1);
+					document.location='results.html'
+				});
 				audioControl.parentElement.appendChild(continueButton);
 			}
 
