@@ -35,18 +35,9 @@ function correlationCoe(pitchArr, userPitchArr) {
 }
 
 function MSE(array1, array2) {
-
 	let ret = 0;
-	for (let i = 0; i < array1.length; i++) {
-		let value1 = array1[i];
-		if (!isReal(value1)) {
-			value1 = 0;
-		}
-		let value2 = array2[i];
-		if (!isReal(value2)) {
-			value2 = 0;
-		}
-		ret += Math.pow(value1[i] - value2[i], 2);
+	for (let i = 0; i < array1.length; ++i) {
+		ret += Math.pow(array1[1] - array2[i], 2);
 	}
 	return ret / array1.length;
 }
