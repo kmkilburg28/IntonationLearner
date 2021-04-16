@@ -1,10 +1,11 @@
-function getA(){
-	let a = new Array;
-	for(var i = 0; i < 3; i ++){
-		a[i] = i + 65;
+function isReal(num){
+	if(num < 0 || num > 1){
+		return false;
 	}
-	return a;
+	return true;
 }
+
+
 function DTW(modelPitchArr, userPitchArr){
 	var M = new Array();
 	var d = new Array();
@@ -17,7 +18,7 @@ function DTW(modelPitchArr, userPitchArr){
 	}
 	for(var i = 0; i < userPitchArr.length; i++){
 		for(var j = 0; j < modelPitchArr.length; j++){
-			d[i][j] = Math.abs(userPitchArr[i] - modelPitchArr[j]);
+			d[i][j] = Math.abs(userPitchArr[i] - modelPitchArr[j]) + .005 * Math.abs(i - j);
 		}
 	}
 	M[0][0] = d[0][0];
@@ -40,9 +41,11 @@ function DTW(modelPitchArr, userPitchArr){
 			}else if (M[i][j - 1] <= M[i - 1][j - 1] && M[i][j - 1] <= M[i - 1][j]){
 				min = M[i][j - 1];
 				parent[i][j] = {x:i,y:j-1};
-			}else{
+			}else if (M[i - 1][j] <= M[i - 1][j - 1] && M[i - 1][j] <= M[i][j - 1]){
 				min = M[i - 1][j];
 				parent[i][j] = {x:i-1,y:j};
+			}else{
+				console.log("FAILED");
 			}
 			M[i][j] = d[i][j] + min;
 		}
@@ -90,7 +93,7 @@ function trim(p1){
 
 
 function warp(modelPitchArr, userPitchArr){
-	//console.log(modelPitchArr, userPitchArr);
+	console.log(modelPitchArr, userPitchArr);
 	modelPitchArr = trim(modelPitchArr);
     userPitchArr = trim(userPitchArr);
 	var dtwMap = DTW(modelPitchArr, userPitchArr);
@@ -99,7 +102,7 @@ function warp(modelPitchArr, userPitchArr){
 	warpedUser = new Array();
 	var segment = ModelSegment(modelPitchArr);
 	var userSegment = new Array();
-	//console.log(segment);
+	console.log(segment);
 	var warpedSeg = new Array();
 	var n = dtwMap.length - 1;
 
@@ -107,44 +110,85 @@ function warp(modelPitchArr, userPitchArr){
 	var j = 0;
 	var k = 0;
 	var segmentIndex = 0;
+	var lastMFinite = modelPitchArr[dtwMap[j].x];
+	var lastUFinite = userPitchArr[dtwMap[i].y];
+	
 	while(i <= n && j <= n){
-		var mAvg = modelPitchArr[dtwMap[i].x];
-		var uAvg = userPitchArr[dtwMap[j].y];
+		if(isReal(userPitchArr[dtwMap[i].y])){
+			lastUFinite = userPitchArr[dtwMap[i].y];
+		}
+		if(isReal(modelPitchArr[dtwMap[j].x])){
+			lastMFinite = modelPitchArr[dtwMap[j].x];
+		}
+		var mAvg =  modelPitchArr[dtwMap[j].x];
+		var uAvg = userPitchArr[dtwMap[i].y];
 		var uCount = 1;
 		var mCount = 1;
 		while((i < n && dtwMap[i].x == dtwMap[i + 1].x) || (j < n && dtwMap[j].y == dtwMap[j + 1].y)){
 			//console.log(i + " " + j);
 			if(dtwMap[j].y == dtwMap[j + 1].y){
 				j++;
-				uAvg += userPitchArr[dtwMap[j].y];
-				uCount++;
+				if(isReal(modelPitchArr[dtwMap[j].x])){
+					mAvg += modelPitchArr[dtwMap[j].x];
+					mCount++;
+					lastMFinite = modelPitchArr[dtwMap[j].x];
+				}
 				if(j == n){
 					break;
 				}
 			}
 			if(dtwMap[i].x == dtwMap[i + 1].x){
 				i++;
-				mAvg += modelPitchArr[dtwMap[i].x];
-				mCount++;
+				if(isReal(userPitchArr[dtwMap[i].y])){
+					uAvg += userPitchArr[dtwMap[i].y];
+					uCount++;
+					lastUFinite = userPitchArr[dtwMap[i].y];
+				}
 				if(i == n){
 					break;
 				}
 			}
 		}
-		if(i >= segment[segmentIndex]){
-			userSegment[segmentIndex] = dtwMap[j].y; 
+
+		if(dtwMap[j].y >= segment[segmentIndex]){
+			userSegment[segmentIndex] = dtwMap[i].x; 
 			warpedSeg[segmentIndex] = k;
 			segmentIndex++;
 		}
-		i++;
-		j++;
+		
 		warpedModel[k] = mAvg/mCount;
 		warpedUser[k] = uAvg/uCount;
+		console.log(i,j,k, warpedUser[k], warpedModel[k], warpedSeg[segmentIndex - 1]);
+		i++;
+		j++;
 		k++;
+		
 	}
-	//console.log(k);
-	//console.log(warpedModel, warpedSeg, warpedUser)
-	//console.log(userPitchArr);
+	if(warpedSeg.length % 2 == 1){
+		warpedSeg[segmentIndex] = k;
+	}
+	i = 0;
+	segmentIndex = 0;
+
+	var testArr = new Array();
+	while(segmentIndex < warpedSeg.length){
+		while(i < n && dtwMap[i].x < warpedSeg[segmentIndex]){
+			i++;
+		}
+		if(warpedSeg.length %2 == 1){
+			while(i < n && dtwMap[i].x < warpedSeg[segmentIndex] + 1){
+				i++;
+			}
+		}
+		testArr[segmentIndex] = dtwMap[i].y;
+		segmentIndex++;
+	}
+	
+	console.log(userPitchArr);
+	console.log(modelPitchArr);
+	console.log(dtwMap);
+	console.log(warpedModel, warpedSeg, warpedUser);
+	
 	return {model:SegmentFormat(warpedModel,warpedSeg), user:SegmentFormat(warpedUser,warpedSeg), userSeg:userSegment, modelSeg:segment};
 }
 

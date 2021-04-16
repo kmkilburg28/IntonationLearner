@@ -1,18 +1,22 @@
+function removeNonReal(a){
+	a.map(value => isReal(value) ? 0: value);
+	return a;
+}
+
 function correlationCoe(pitchArr, userPitchArr) {
+	pitchArr = removeNonReal(pitchArr);
+	userPitchArr = removeNonReal(userPitchArr);
+	console.log(pitchArr, userPitchArr);
 	var modelAvg = 0;
 
 	for (var i = 0; i < pitchArr.length; i++) {
-		if(pitchArr[i] < 0){
-			pitchArr[i] = 0;
-		}
+
 		modelAvg += pitchArr[i];
 	}
 	modelAvg /= pitchArr.length;
 	var userAvg = 0;
 	for (var i = 0; i < userPitchArr.length; i++) {
-		if(userPitchArr[i] < 0){
-			userPitchArr[i] = 0;
-		}
+		
 		userAvg += userPitchArr[i];
 	}
 	userAvg /= userPitchArr.length;
@@ -33,6 +37,12 @@ function correlationCoe(pitchArr, userPitchArr) {
 function MSE(pitchArr, userPitchArr){
 	var ret = 0;
 	for (var i = 0; i < userPitchArr.length; i++) {
+		if(!isReal(pitchArr[i])){
+			pitchArr[i] = 0;
+		}
+		if(!isReal(userPitchArr[i])){
+			userPitchArr[i] = 0;
+		}
 		ret += (pitchArr[i] - userPitchArr[i]) * (pitchArr[i] - userPitchArr[i]);
 	}
 	return ret / userPitchArr.length;

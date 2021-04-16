@@ -114,8 +114,8 @@
 					scales: {
 						yAxes: [{
 							ticks: {
-								//min: 0.0,
-								//max: 1.0
+								min: 0.0,
+								max: 1.0
 							}
 						}]
 					},
@@ -170,48 +170,64 @@
 			});
 
 			const frequenciesUser = getFrequencies(rawUser);			
-
-			const normalizedModel = trim(NormalizeArray(frequenciesModel.buffer)).map(value => value < 0 ? -Infinity: value);
-			const noramlizedUser  = trim(NormalizeArray(frequenciesUser.buffer)).map(value => value < 0 ? Infinity: value);
+			let nm = trim(NormalizeArray(frequenciesModel.buffer)).map(value => value < 0 ? -1: value);
+			// for(let i = 1; i < nm.length;i++){
+			// 	if(!isReal(nm[i])){
+			// 		nm[i] = nm[i - 1];
+			// 	}
+			// }
+			let nu = trim(NormalizeArray(frequenciesUser.buffer)).map(value => value < 0 ? 1.1: value);
+			// for(let i = 1; i < nu.length;i++){
+			// 	if(!isReal(nu[i])){
+			// 		nu[i] = nu[i - 1];
+			// 	}
+			// }
+			nu = nu.length < nm.length ? NormalizeTime(nu,nm):nu;
+			nm = nu.length < nm.length ? nm : NormalizeTime(nu,nm);
+			const normalizedModel = nm;
+			const noramlizedUser  = nu;
 			for(let i = 0; i < normalizedModel.length || i < noramlizedUser.length; i++){
 				chart.data.labels[i] = i;
 			}
 			chart.data.datasets[0].data = normalizedModel;
 			chart.data.datasets[1].data = noramlizedUser;
 			chart.update();
+			const mse = MSE(normalizedModel, noramlizedUser);
+			const co = correlationCoe(noramlizedUser,normalizedModel);
 			/** @type {{model, user}} */
-			const segmentedAudio = warp(normalizedModel, noramlizedUser);
-			const co = new Float32Array(segmentedAudio.model.length);
-			const mse = new Float32Array(segmentedAudio.model.length);
-			for (let i = 0; i < segmentedAudio.model.length; ++i) {
+			// const segmentedAudio = warp(normalizedModel, noramlizedUser);
+			// console.log(segmentedAudio);
+			// const co = new Float32Array(segmentedAudio.model.length);
+			// const mse = new Float32Array(segmentedAudio.model.length);
+			// for (let i = 0; i < segmentedAudio.model.length; ++i) {
 				
-				mse[i] = MSE(segmentedAudio.model[i], segmentedAudio.user[i]);
+			// 	mse[i] = MSE(segmentedAudio.model[i], segmentedAudio.user[i]);
 
-				const SplineArrayModel = getSplineFromArray(segmentedAudio.model[i]);
-				//console.log(SplineArrayModel);
+			// 	const SplineArrayModel = getSplineFromArray(segmentedAudio.model[i]);
+			// 	//console.log(SplineArrayModel);
 
-				let lastRealIndex = 0;
-				for (let x = 0; x < segmentedAudio.model[i].length; x++) {
-					if(!isFinite(segmentedAudio.model[i][x])){
-						segmentedAudio.model[i][x] = SplineArrayModel[lastRealIndex].evaluate(x);
-					}else{
-						lastRealIndex++;
-					}
-				}
-				const SplineArrayUser = getSplineFromArray(segmentedAudio.user[i]);
-				console.log(SplineArrayUser);
-				lastRealIndex = 0;
-				for (let x = 0; x < segmentedAudio.user[i].length; x++) {
-					if(!isFinite(segmentedAudio.user[i][x])){
-						segmentedAudio.user[i][x] = SplineArrayUser[lastRealIndex].evaluate(x);
-					}else{
-						lastRealIndex++;
-					}
-				}
-				co[i]  = correlationCoe(segmentedAudio.model[i], segmentedAudio.user[i]);
+			// 	let lastRealIndex = 0;
+			// 	for (let x = 0; x < segmentedAudio.model[i].length; x++) {
+			// 		if(!isReal(segmentedAudio.model[i][x])){
+			// 			segmentedAudio.model[i][x] = SplineArrayModel[lastRealIndex].evaluate(x);
+			// 		}else{
+			// 			lastRealIndex++;
+			// 		}
+			// 	}
+			// 	const SplineArrayUser = getSplineFromArray(segmentedAudio.user[i]);
+			// 	//console.log(SplineArrayUser);
+			// 	lastRealIndex = 0;
+			// 	for (let x = 0; x < segmentedAudio.user[i].length; x++) {
+			// 		if(!isReal(segmentedAudio.user[i][x])){
+			// 			segmentedAudio.user[i][x] = SplineArrayUser[lastRealIndex].evaluate(x);
+			// 		}else{
+			// 			lastRealIndex++;
+			// 		}
+			// 	}
+			// 	co[i]  = correlationCoe(segmentedAudio.model[i], segmentedAudio.user[i]);
 				
-				//plotSpline(SplineArrayUser, chart, "UserSmooth");
-			}
+			// 	//plotSpline(SplineArrayUser, chart, "UserSmooth");
+			// }
 			console.log(co, mse);
 
 
