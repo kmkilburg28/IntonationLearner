@@ -69,13 +69,15 @@ async function recordAudio(e) {
 					const INCREMENT = 512;
 					// const OVERLAP = WINDOW_SIZE - INCREMENT;
 					const newFrequencesLength = Math.ceil((rawData.buffer.length - WINDOW_SIZE - nextWindowStart) / INCREMENT);
+					if (newFrequencesLength <= 0) {
+						return false;
+					}
 					const newFrequences = new Float32Array(newFrequencesLength);
 					const FULL_BATCH_SIZE = 4;
 					let batchSize = FULL_BATCH_SIZE < newFrequencesLength ? FULL_BATCH_SIZE : newFrequencesLength;
 					let threadsStarted = 0;
 					let threadsLeft = batchSize;
 					let frequencyInd = 0;
-					console.log(newFrequencesLength);
 					for (/* nextWindowStart */; nextWindowStart < rawData.buffer.length; nextWindowStart += INCREMENT) {
 						if (rawData.buffer.length - nextWindowStart < WINDOW_SIZE) {
 							break;
@@ -97,7 +99,7 @@ async function recordAudio(e) {
 								frequencesData[i-batchSize-1] = frequencesData[i];
 							}
 							threadsStarted = 0;
-							while (threadsLeft > 0) {console.log(threadsLeft + " threads left")}
+							// while (threadsLeft > 0) {console.log(threadsLeft + " threads left")}
 
 							for (let i = 0; i < batchSize; ++i) {
 
@@ -118,7 +120,7 @@ async function recordAudio(e) {
 
 							batchSize = FULL_BATCH_SIZE < newFrequencesLength - frequencyInd ? FULL_BATCH_SIZE : newFrequencesLength - frequencyInd;
 							threadsLeft = batchSize;
-							console.log("Batch: ", frequencyInd / FULL_BATCH_SIZE);
+							// console.log("Batch: ", frequencyInd / FULL_BATCH_SIZE);
 							(async () => chart.update())();
 						}
 					}
@@ -163,9 +165,6 @@ async function recordAudio(e) {
 				});
 			}
 			fileReader.readAsArrayBuffer(audioBlob);
-			const params = new URLSearchParams(window.location.search);
-			localStorage.removeItem('modelfile');
-			localStorage.setItem('modelfile', params.get('modelfile'));
 		},
 		onPermissionsFail: () => {
 			let childNodes = audioControl.parentNode.childNodes;

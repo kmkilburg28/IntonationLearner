@@ -17,30 +17,13 @@
 	<script src="training.js" type="text/javascript"></script>
     <script src="SegmentFormat.js" type="text/javascript"></script>
     <script src="DTW.js" type="text/javascript"></script>
+    <script src="AudioFileData.js" type="text/javascript"></script>
 </head>
 <body>
 	<h2>Training</h2>
 	<div>
-		<button onclick="document.location='index.html'">Exit</button>
+		<button onclick="document.location='index.html'">Home</button>
 		<button id="listenButton">Listen</button>
-		<script>
-			const params = new URLSearchParams(window.location.search);
-			if (params.has("uploaded")) {} // TODO
-
-			const modelFileName = params.get('modelfile');
-			const filePath = "Model Speaker Files/" + modelFileName + ".wav";
-
-			async function demoAudio() {
-				const baseURL = "https://kmkilburg28.github.io/IntonationLearner/";
-				const audioBuffer = await loadAudioFile(baseURL + filePath);
-				const parsedAudio = parseAudioBuffer(audioBuffer);
-				const frequencies = getFrequencies(parsedAudio);
-				playAudioBuffer(audioBuffer, 1);
-				return frequencies;
-			};
-			const listenButton = document.getElementById('listenButton');
-			listenButton.addEventListener('click', demoAudio);
-		</script>
 		<div class="container" style="width:40%;"></div>
 		<br>
 		<div>
@@ -49,7 +32,7 @@
 
 	</div>
 	<script type="text/javascript">
-		function createConfig(pointStyle) {
+		function createConfig() {
 			return {
 				type: 'line',
 				data: {
@@ -85,7 +68,7 @@
 					},
 					elements: {
 						point: {
-							pointStyle: pointStyle
+							pointStyle: 'circle'
 						}
 					},
 					scales: {
@@ -108,24 +91,28 @@
 		const YIN_THRESHOLD_MODEL = 0.2;
 
 		window.onload = async function() {
-			var container = document.querySelector('.container');
+			const container = document.querySelector('.container');
 
-			var div = document.createElement('div');
+			let div = document.createElement('div');
 			div.classList.add('chart-container');
 
-			var canvas = document.createElement('canvas');
+			let canvas = document.createElement('canvas');
 			div.appendChild(canvas);
 			container.appendChild(div);
 
-			var ctx = canvas.getContext('2d');
-			var config = createConfig('circle');
+			let ctx = canvas.getContext('2d');
+			let config = createConfig();
 			const chart = new Chart(ctx, config);
 
+			const modelAudioData = getPageModelAudioData();
 
-			const baseURL = "https://kmkilburg28.github.io/IntonationLearner/";
-			const audioBuffer = await loadAudioFile(baseURL + filePath);
+			const audioBuffer = await loadAudioFile(modelAudioData.location);
 			const parsedAudio = parseAudioBuffer(audioBuffer);
 			const frequencies = getFrequencies(parsedAudio);
+
+			const listenButton = document.getElementById('listenButton');
+			listenButton.addEventListener('click', () => playAudioBuffer(audioBuffer));
+
 			plotArray(frequencies.buffer, chart, "Model");
 			chart.data.datasets.map(dataset => {
 				if (dataset.label == "User")

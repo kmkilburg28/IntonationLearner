@@ -4,7 +4,7 @@ class Trial {
 	/** @type {number} */
 	modelTrialId;
 	/** @type {string} */
-	modelfile;
+	modelLabel;
 	/** @type {number} */
 	co;
 	/** @type {number} */
@@ -13,17 +13,24 @@ class Trial {
 	/**
 	 * @param {number} id 
 	 * @param {number} modelTrialId 
-	 * @param {string} modelfile 
+	 * @param {string} modelLabel 
 	 * @param {number} co 
 	 * @param {number} mse 
 	 */
-	constructor(id, modelTrialId, modelfile, co, mse) {
+	constructor(id, modelTrialId, modelLabel, co, mse) {
 		this.id = id;
 		this.modelTrialId = modelTrialId;
-		this.modelfile = modelfile;
+		this.modelLabel = modelLabel;
 		this.co = co;
 		this.mse = mse;
 	}
+}
+
+/**
+ * @return {Trail[]}
+ */
+function getTrials() {
+	return getTrailsFromString(localStorage.getItem("trials"));
 }
 
 /**
@@ -44,20 +51,20 @@ function getTrailsFromString(trialsString) {
  * @param {number} mse 
  */
 function attemptCreateTrial(co, mse) {
-	let trials = getTrailsFromString(localStorage.getItem("trials"));
+	let trials = getTrials();
 	let id = parseInt(localStorage.getItem("lastTrialId"));
-	let modelfile = localStorage.getItem("modelfile");
+	let modelLabel = localStorage.getItem("modelLabel");
 
 	let maxPrevModelId = -1;
 	for (let trial of trials) {
 		if (trial.id === id) {
 			return false;
 		}
-		if (trial.modelfile == modelfile && trial.modelTrialId > maxPrevModelId) {
+		if (trial.modelLabel == modelLabel && trial.modelTrialId > maxPrevModelId) {
 			maxPrevModelId = trial.modelTrialId;
 		}
 	}
-	let newTrial = new Trial(id, maxPrevModelId+1, modelfile, co, mse);
+	let newTrial = new Trial(id, maxPrevModelId+1, modelLabel, co, mse);
 	trials.push(newTrial);
 	localStorage.setItem("trials", JSON.stringify(trials));
 
