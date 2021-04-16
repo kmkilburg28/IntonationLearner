@@ -1,0 +1,121 @@
+<title>Experiment #2</title>
+
+<style media = "screen">
+    input, button {
+        padding: 7px;
+        height: 30px;
+    }
+
+    fieldset {
+        margin-bottom: 10px;
+    }
+
+
+</style>
+
+<body>
+    <h1 id="title">Experiment #2 -- Non-Native Speakers Training C</h1>
+
+    <fieldset id="insDiv">
+        <legend>Training Time</legend>
+        <p>Are you ready for your training?</p>
+        <button type="button" id="btnBegin">Let's Begin</button>
+    </fieldset>
+
+    <fieldset id="mesDiv" style="display: none">
+        <legend>Instructions</legend>
+        <div id="mesOutput"></div>
+        <button type="button" id="btnAudio">Take me to the contours!</button>
+    </fieldset>
+
+    <fieldset id="audioDiv" style="display: none">
+        <legend>Audio Files</legend>
+        <div id="audioOutput1">
+             <p>File #1: New York City is a tough place to live.</p>
+             <audio controls>
+                <source id="G" src="Model Speaker Files/G.wav" type="audio/wav">
+            </audio> </br></br>
+
+            <p>File #2: Are you sure about that?</p>
+            <audio controls>
+               <source id="G" src="Model Speaker Files/A.wav" type="audio/wav">
+           </audio> </br></br>
+
+           <p>File #3: Make yourself at home.</p>
+           <audio controls>
+              <source id="G" src="Model Speaker Files/B.wav" type="audio/wav">
+          </audio> </br></br>
+
+          <p>File #4: I have a big favor to ask.</p>
+          <audio controls>
+             <source id="G" src="Model Speaker Files/C.wav" type="audio/wav">
+         </audio> </br></br>
+
+         <p>File #5: It's too bad that you can't come.</p>
+         <audio controls>
+            <source id="G" src="Model Speaker Files/F.wav" type="audio/wav">
+        </audio> </br></br>
+        <hr> 
+        <button type="button" id="btnNext">Next Page</button>
+        </div>
+
+</body>
+
+<script type ="text/javascript">
+
+//I used IndexedDB because I didn't know how to use Local Storage to save audio files, so do whatever you need to do!
+
+const list = document.querySelector('ol');
+const form = document.querySelector('form');
+
+let db;
+
+window.onload = function() {
+    let request = window.indexedDB.open("Exp1", 1);
+    request.onerror = function() {
+        console.log("Databased crashed and burned. Try harder.");
+    };
+    request.onsuccess = function() {
+        console.log("Database opened successfully.");
+        db = request.result;
+        displayData();
+    }
+    request.onupgradeneeded = function(e) {
+        let db = e.target.result;
+        let objectStore = db.createObjectStore('users', { autoIncrement: true});
+        objectStore.createIndex('recording', 'recording', {unique: false});
+        console.log("Database setup complete.");
+    };
+
+    //Instructions Div Portion
+    const btnBegin = document.getElementById("btnBegin");
+    const btnAudio = document.getElementById("btnAudio");
+    const insDiv = document.getElementById("insDiv");
+    const mesDiv = document.getElementById("mesDiv");
+    const mesOutput = document.getElementById("mesOutput");
+    const audioDiv = document.getElementById("audioDiv");
+
+    btnBegin.onclick = nameDisplayCheck;
+
+    function nameDisplayCheck() {
+        mesDiv.style.display = 'block';
+        if(localStorage.getItem('name')) {
+            let name = localStorage.getItem('name');
+            mesOutput.innerHTML = "Here's what you need to do, " + name + "." + "<br>" + "<br>" + 
+        "1. Play the audio files below (they'll be the same ones from the previous page)." + "<br>" + 
+        "2. Pay attention to the pitch contour (in pink) of the sentence. Is the pitch falling, rising, falling-rising, rising-falling, or staying flat?" + "<br>" + 
+        "3. Intonation patterns are used by speakers to convey intent. For example:" + "<br>" + "<br>" + 
+        "<li> falling tone = statements <li> rising tone = questions <li> falling-rising tone = hestitation or polite requests <li> rising-falling tone = strong feelings of approval/disapproval surprise <li> flat tone = neutral state" + "<br>" + "<br>" + 
+        "4. Then, use the microphone to practice the sentence with the intonation used by the speaker. Your pitch contour will appear in blue." + "<br>" + 
+        "5. When you feel comfortable with the intonation of all 5 sentences, move onto the next page!" + "<br>"+ "<br>";
+        }
+    }
+
+    document.body.onload = nameDisplayCheck;
+    
+    btnAudio.onclick = function() {
+        audioDiv.style.display = 'block';
+    }
+}
+    
+</script>

@@ -1,4 +1,4 @@
-<title>Experiment #1</title>
+<title>Experiment #2</title>
 
 <style media = "screen">
     input, button {
@@ -14,7 +14,7 @@
 </style>
 
 <body>
-    <h1 id="title">Experiment #1-- Test</h1>
+    <h1 id="title">Experiment #2 -- Non-Native Speakers C </h1>
     <fieldset>
         <legend>Hello, there! What's your name?</legend>
         <h2> Name: </h2>
@@ -63,7 +63,8 @@
             <h3>Recordings List</h3>
                 <ol id="recordingsList"></ol>
             </div> 
-
+            <hr>
+            <button type="button" id="btnTraining">Upload and Next</button>
         </div>
     </fieldset>
     <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
@@ -72,7 +73,7 @@
 
 <script type ="text/javascript">
 
-//Create database for Experiment 1
+//I used IndexedDB because I didn't know how to use Local Storage to save audio files, so do whatever you need to do!
 
 const list = document.querySelector('ol');
 const form = document.querySelector('form');
@@ -116,8 +117,8 @@ window.onload = function() {
             insOutput.innerHTML = "Thanks for participating in our study, " + name + "!" + "<br>" + "<br>" + 
         "1. Please listen to each audio file once." + "<br>" + 
         "2. Then, record yourself saying that same sentence into the microphone 3 times." + "<br>" + 
-        "3. You should have 15 recordings by the end of this." + "<br>" + 
-        "4. That's it, easy peasy!" + "<br>"+ "<br>";
+        "3. You should have 15 recordings by the end." + "<br>" + 
+        "4. When you have 15 sentences, click on the 'upload and next button'!" + "<br>"+ "<br>";
         }
     }
 

@@ -1,0 +1,119 @@
+<title>Experiment #2</title>
+
+<style media = "screen">
+    input, button {
+        padding: 7px;
+        height: 30px;
+    }
+
+    fieldset {
+        margin-bottom: 10px;
+    }
+
+
+</style>
+
+<body>
+    <h1 id="title">Experiment #2 -- Non-Native Speakers Training C</h1>
+
+    <fieldset id="insDiv">
+        <legend>Post-Training Test</legend>
+        <p>Did any of that training make a difference?</p>
+        <button type="button" id="btnBegin">Let's Find Out!</button>
+    </fieldset>
+
+    <fieldset id="mesDiv" style="display: none">
+        <legend>Instructions</legend>
+        <div id="mesOutput"></div>
+        <button type="button" id="btnAudio">Audio Files</button>
+    </fieldset>
+
+    <fieldset id="audioDiv" style="display: none">
+        <legend>Audio Files</legend>
+        <div id="audioOutput1">
+             <p>File #1: New York City is a tough place to live.</p>
+             <audio controls>
+                <source id="G" src="Model Speaker Files/G.wav" type="audio/wav">
+            </audio> </br></br>
+
+            <p>File #2: Are you sure about that?</p>
+            <audio controls>
+               <source id="G" src="Model Speaker Files/A.wav" type="audio/wav">
+           </audio> </br></br>
+
+           <p>File #3: Make yourself at home.</p>
+           <audio controls>
+              <source id="G" src="Model Speaker Files/B.wav" type="audio/wav">
+          </audio> </br></br>
+
+          <p>File #4: I have a big favor to ask.</p>
+          <audio controls>
+             <source id="G" src="Model Speaker Files/C.wav" type="audio/wav">
+         </audio> </br></br>
+
+         <p>File #5: It's too bad that you can't come.</p>
+         <audio controls>
+            <source id="G" src="Model Speaker Files/F.wav" type="audio/wav">
+        </audio> </br></br>
+        <hr> 
+        <button type="button" id="btnNext">Upload Data</button>
+        </div>
+
+</body>
+
+<script type ="text/javascript">
+
+//I used IndexedDB because I didn't know how to use Local Storage to save audio files, so do whatever you need to do!
+
+const list = document.querySelector('ol');
+const form = document.querySelector('form');
+
+let db;
+
+window.onload = function() {
+    let request = window.indexedDB.open("Exp1", 1);
+    request.onerror = function() {
+        console.log("Databased crashed and burned. Try harder.");
+    };
+    request.onsuccess = function() {
+        console.log("Database opened successfully.");
+        db = request.result;
+        displayData();
+    }
+    request.onupgradeneeded = function(e) {
+        let db = e.target.result;
+        let objectStore = db.createObjectStore('users', { autoIncrement: true});
+        objectStore.createIndex('recording', 'recording', {unique: false});
+        console.log("Database setup complete.");
+    };
+
+    //Instructions Div Portion
+    const btnBegin = document.getElementById("btnBegin");
+    const btnAudio = document.getElementById("btnAudio");
+    const insDiv = document.getElementById("insDiv");
+    const mesDiv = document.getElementById("mesDiv");
+    const mesOutput = document.getElementById("mesOutput");
+    const audioDiv = document.getElementById("audioDiv");
+
+    btnBegin.onclick = nameDisplayCheck;
+
+    function nameDisplayCheck() {
+        mesDiv.style.display = 'block';
+        if(localStorage.getItem('name')) {
+            let name = localStorage.getItem('name');
+            mesOutput.innerHTML = "One last time, " + name + "!" + "<br>" + "<br>" + 
+        "1. Please listen to each audio file once (they'll be the same ones we've been using)." + "<br>" + 
+        "2. Then, record yourself saying that same sentence into the microphone 3 times." + "<br>" + 
+        "3. You should have 15 recordings by the end." + "<br>" + 
+        "4. Aaaand that's it! Click on 'Upload Data' and you'll be done!" + "<br>"+ "<br>";
+        }
+    }
+
+    document.body.onload = nameDisplayCheck;
+    
+    btnAudio.onclick = function() {
+        audioDiv.style.display = 'block';
+    }
+}
+    
+</script>
