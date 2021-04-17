@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Experiment Group 2.1</title>
+	<script src="../InitializeListAudio.js" type="text/javascript"></script>
+	<script src="../AudioFileHelpers.js" type="text/javascript"></script>
+	<script src="../Data.js" type="text/javascript"></script>
+	<script src="../AudioFileData.js" type="text/javascript"></script>
+	<script src="../AudioRecorder.js" type="text/javascript"></script>
+	<script src="../Trial.js" type="text/javascript"></script>
+	<script src="../RawData.js" type="text/javascript"></script>
+	<script src="../FrequencyData.js" type="text/javascript"></script>
+	<script src="../CorrelationMSE.js" type="text/javascript"></script>
+	<script src="../SmoothingSpline.js" type="text/javascript"></script>
+	<script src="../ModelSegment.js" type="text/javascript"></script>
+	<script src="../Normalization.js" type="text/javascript"></script>
+	<script src="../DTW.js" type="text/javascript"></script>
+	<script src="../yin.min.js" type="text/javascript"></script>
+	<script src="../PitchDetection.js" type="text/javascript"></script>
+	<script src="../ExperimentHelper.js" type="text/javascript"></script>
+	<script src="training.js" type="text/javascript"></script>
+	<style media = "screen">
+
+		fieldset {
+			margin-bottom: 5px;
+		}
+	</style>
+</head>
+<body>
+	<h1 id="title">Experiment Group 2.1 -- Non-Native Speakers</h1>
+
+	<fieldset id="insDiv">
+		<legend>Instructions</legend>
+		<div id="insOutput">
+			Thanks for participating in our study!
+			<ol>
+				<li>Please click on each practice phrase link and listen to its audio file.</li>
+				<li>Then, record yourself saying that same sentence into the microphone 3 times.</li>
+				<li>You should have 15 recordings by the end.</li>
+				<li>After this, you will be prompted to download your results and send them to the Tone Nation group.</li>
+				<li>That's it, easy peasy!</li>
+			</ol>
+		</div>
+	</fieldset>
+	<fieldset>
+		<legend>Pre-test</legend>
+		<div id="modelAudioList-pretest"></div>
+	</fieldset>
+	<fieldset style="display: none;">
+		<legend>Practice Phrases</legend>
+		<div id="modelAudioList-training"></div>
+	</fieldset>
+	<fieldset style="display: none;">
+		<legend>Post-test</legend>
+		<div id="modelAudioList-posttest"></div>
+	</fieldset>
+	<fieldset id="download-box" style="display: none;">
+		<legend>Download Results</legend>
+		<p>
+			Congratulations, you have now completed this experiment!<br/>
+			Please download your results data and email them to <a href="mailto:apriltan@iastate.edu">apriltan@iastate.edu</a>.
+		</p>
+		<button onclick="downloadData()">Download Results</button>
+		<p>
+			For more practice, visit <a href="../index.html">here</a>.
+		</p>
+	</fieldset>
+	<script>
+		
+		const modelAudioDatasGroup = modelAudioDatas.filter(modelAudioData => modelLabels.includes(modelAudioData.label));
+		
+		let preTestCompleted = fillTestBox('pretest');
+		if (preTestCompleted) {	
+			let trainingCompleted = fillTestBox('training');
+			if (trainingCompleted) {
+				let postTestCompleted = fillTestBox('posttest');
+				if (postTestCompleted) {
+					document.getElementById('download-box').style.display = "";
+				}
+			}
+		}
+	</script>
+</body>

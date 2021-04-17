@@ -131,9 +131,7 @@ async function recordAudio(e) {
 		},
 		onAudioStop: (audioBlob) => {
 			audioControl.textContent = "Reset";
-			audioControl.addEventListener('click', () => {
-				window.location.reload();
-			});
+			audioControl.addEventListener('click', window.location.reload);
 			let continueButton = document.getElementById("continueButton");
 			if (!continueButton) {
 				continueButton = document.createElement("button");
@@ -164,6 +162,92 @@ async function recordAudio(e) {
 				});
 			}
 			fileReader.readAsArrayBuffer(audioBlob);
+		},
+		onPermissionsFail: () => {
+			let childNodes = audioControl.parentNode.childNodes;
+			for (let i = 0; i < childNodes.length; ++i) {
+				if (childNodes[i].className == "warning") {
+					return;
+				}
+			}
+			warningStr = "Unable to contact to audio. Please ensure a microphone is connected and permissions are enabled.";
+			let warning = document.createElement('span');
+			warning.className = "warning";
+			warning.textContent = warningStr;
+			audioControl.parentNode.appendChild(warning);
+		}
+	});
+	audioRecorder.start();
+	audioControl.audioRecorder = audioRecorder;
+}
+
+
+async function recordAudioTest(e) {
+	/** @type {HTMLButtonElement} */
+	const audioControl = e.target;
+
+	let stopFunction = () => {};
+
+	const audioRecorder = new AudioRecorder({
+		onAudioStart: () => {
+			audioControl.removeEventListener('click', recordAudioTest);
+			stopFunction = () => {
+				audioRecorder.stop();
+			};
+			audioControl.addEventListener('click', stopFunction);
+			audioControl.textContent = audioControl.textContent.split(':')[0] + ": Stop Recording";
+		},
+		onAudioStop: (audioBlob) => {
+			audioControl.textContent = "Reset";
+			audioControl.removeEventListener('click', stopFunction);
+			audioControl.addEventListener('click', () => document.location.reload());
+			const modelAudioData = audioControl.modelAudioData;
+
+			let frequenciesModel = undefined;
+			(async () => {
+				const audioBuffer = await loadAudioFile(modelAudioData.location);
+				const rawData = parseAudioBuffer(audioBuffer);
+				const frequenciesModel = getFrequencies(rawData);
+				return frequenciesModel;
+			})().then(frequenciesModelRet => {
+				frequenciesModel = frequenciesModelRet;
+			});
+			let frequenciesUser = undefined;
+			let fileReader = new FileReader();
+			fileReader.onloadend = () => {
+				let arrayBuffer = fileReader.result;
+				audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+					const rawData = parseAudioBuffer(audioBuffer);
+					frequenciesUser = getFrequencies(rawData);
+				});
+			}
+			fileReader.readAsArrayBuffer(audioBlob);
+
+
+			let submitButton = document.getElementById(audioControl.id + "-submitButton");
+			if (!submitButton) {
+				submitButton = document.createElement("button");
+				submitButton.id = audioControl.id + "-submitButton";
+				submitButton.textContent = "Submit";
+				submitButton.addEventListener('click', () => {
+					submitButton.disabled = true;
+					let lastTrialId = localStorage.getItem('lastTrialId');
+					if (lastTrialId == null)
+						lastTrialId = 0;
+					localStorage.setItem('lastTrialId', parseInt(lastTrialId) + 1);
+					console.log(modelAudioData)
+					localStorage.setItem('modelLabel', modelAudioData.label);
+					
+					console.log(frequenciesModel, frequenciesUser);
+					const normalizedModelAndUser = normalizeFrequencyArray(frequenciesModel.buffer, frequenciesUser.buffer);
+					const coAndMSE = getCoAndMSE(normalizedModelAndUser.normalized1, normalizedModelAndUser.normalized2);
+					
+					attemptCreateTrial(coAndMSE.co, coAndMSE.mse, audioControl.trialGroup);
+					console.log(localStorage)
+					document.location.reload();
+				});
+				audioControl.parentElement.appendChild(submitButton);
+			}
 		},
 		onPermissionsFail: () => {
 			let childNodes = audioControl.parentNode.childNodes;

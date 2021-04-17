@@ -87,10 +87,12 @@ class AudioRecorder {
 
 		mediaRecorder.start();
 
-		this.trackedObjects.interval = setInterval(() => {
-			this.trackedObjects.mediaRecorder.requestData();
-		}, this.INTERVAL_TIMER);
-		
+		if (this.callbacks.onDataAvailable) {
+			this.trackedObjects.interval = setInterval(() => {
+				this.trackedObjects.mediaRecorder.requestData();
+			}, this.INTERVAL_TIMER);
+		}
+
 		this.trackedObjects.mediaRecorder = mediaRecorder;
 
 		return true;

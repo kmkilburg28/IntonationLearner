@@ -90,3 +90,38 @@ function stringToRawData(rawDataString) {
 	});
 	chart.update();
 }
+
+/**
+ * @param {Float32Array} frequencies1 
+ * @param {Float32Array} frequencies2 
+ * @returns {{normalized1: Float32Array, normalized2: Float32Array}}
+ */
+function normalizeFrequencyArray(frequencies1, frequencies2) {
+	let n1 = trim(NormalizeArray(frequencies1));
+	let n2 = trim(NormalizeArray(frequencies2));
+
+	n2 = n2.length < n1.length ? NormalizeTime(n2, n1) : n2;
+	n1 = n2.length < n1.length ? n1 : NormalizeTime(n2, n1);
+	return {
+		normalized1: n1,
+		normalized2: n2
+	}
+}
+
+/**
+ * @param {Float32Array} frequencies1 
+ * @param {Float32Array} frequencies2 
+ * @return {{co: {number}, mse:{number}}}
+ */
+function getCoAndMSE(frequencies1, frequencies2) {
+	const SplineArray1 = getSplineFromArray(frequencies1, 0.01);
+	const smoothed1 = evaluateSplineArray(SplineArray1, 0, frequencies1.length);
+
+	const SplineArray2 = getSplineFromArray(frequencies2, 0.01);
+	const smoothed2 = evaluateSplineArray(SplineArray2, 0, frequencies2.length);
+
+	return {
+		co: correlationCoe(smoothed2, smoothed1),
+		mse: MSE(smoothed1, smoothed2)
+	};
+}

@@ -36,6 +36,8 @@ class Spline {
 }
 
 /**
+ * Smoothing Spline implemented as described by D.S.G. Pollock in "Smoothing with Cubic Splines"
+ * https://r.789695.n4.nabble.com/file/n905996/SPLINES.PDF
  * @param {Spline[]} S 
  * @param {[]} sigma 
  * @param {number} lambda 
@@ -89,6 +91,8 @@ function SmoothingSpline(S, sigma, lambda, n) {
 }
 
 /**
+ * Quincunx implemented as described by D.S.G. Pollock in "Smoothing with Cubic Splines"
+ * https://r.789695.n4.nabble.com/file/n905996/SPLINES.PDF
  * @param {number} n 
  * @param {[]} u 
  * @param {[]} v 

@@ -27,10 +27,11 @@ class Trial {
 }
 
 /**
+ * @param {string} trialsGroup
  * @return {Trail[]}
  */
-function getTrials() {
-	return getTrailsFromString(localStorage.getItem("trials"));
+function getTrials(trialsGroup) {
+	return getTrailsFromString(localStorage.getItem(trialsGroup));
 }
 
 /**
@@ -47,11 +48,12 @@ function getTrailsFromString(trialsString) {
 }
 
 /**
- * @param {number} co 
- * @param {number} mse 
+ * @param {number} co
+ * @param {number} mse
+ * @param {string} trialsGroup
  */
-function attemptCreateTrial(co, mse) {
-	let trials = getTrials();
+function attemptCreateTrial(co, mse, trialsGroup) {
+	let trials = getTrials(trialsGroup);
 	let id = parseInt(localStorage.getItem("lastTrialId"));
 	let modelLabel = localStorage.getItem("modelLabel");
 
@@ -66,7 +68,7 @@ function attemptCreateTrial(co, mse) {
 	}
 	let newTrial = new Trial(id, maxPrevModelId+1, modelLabel, co, mse);
 	trials.push(newTrial);
-	localStorage.setItem("trials", JSON.stringify(trials));
+	localStorage.setItem(trialsGroup, JSON.stringify(trials));
 
-	return true;
+	return newTrial;
 }

@@ -19,17 +19,35 @@
 </head>
 <body>
 	<h2>Tone Nation</h2>
-	<div>
+	<fieldset>
+		<legend>Hello, possible experiments are listed below.</legend>
+		<h2>Experiments: </h2>
+		<ul>
+			<li>
+				<a href="experiment1/index.html">Experiment Group 1 -- Native Speakers</a>
+			</li>
+			<li>
+				<a href="experiment2_1/index.html">Experiment Group 2.1 -- Non-Native Speakers Control</a>
+			</li>
+			<li>
+				<a href="experiment2_2/index.html">Experiment Group 2.2 -- Non-Native Speakers Experimental</a>
+			</li>
+		</ul>
+    </fieldset>
+	<br/>
+	<fieldset>
 		<h3>Practice Phrases</h3>
 		<ul id="modelAudioSelect"></ul>
 		<script>
 			initializeULAudio('modelAudioSelect', modelAudioDatas);
 			// plotProgress(getTrials());
 		</script>
-	</div>
-	<div>
+	</fieldset>
+	<br/>
+	<fieldset>
 		<h3>Progress</h3>
-		<button onclick="downloadData()">Download Results</button>
-	</div>
+		<button onclick="downloadData()" style="margin-bottom: 0.5em;">Download Results</button><br/>
+		<button onclick="clearData()">Erase Results</button>
+	</fieldset>
 </body>
 </html>

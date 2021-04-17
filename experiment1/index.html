@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Experiment Group 1</title>
+	<script src="../InitializeListAudio.js" type="text/javascript"></script>
+	<script src="../AudioFileHelpers.js" type="text/javascript"></script>
+	<script src="../Data.js" type="text/javascript"></script>
+	<script src="../AudioFileData.js" type="text/javascript"></script>
+	<script src="../Trial.js" type="text/javascript"></script>
+	<script src="../ExperimentHelper.js" type="text/javascript"></script>
+	<style media = "screen">
+		input, button {
+			padding: 7px;
+			height: 30px;
+		}
+	
+		fieldset {
+			margin-bottom: 10px;
+		}
+	</style>
+</head>
+<body>
+	<h1 id="title">Experiment Group 1 -- Native Speakers</h1>
+
+	<fieldset id="insDiv">
+		<legend>Instructions</legend>
+		<div id="insOutput">
+			Thanks for participating in our study!
+			<ol>
+				<li>Please click on each practice phrase link and listen to its audio file.</li>
+				<li>Then, record yourself saying that same sentence into the microphone 3 times.</li>
+				<li>You should have 15 recordings by the end.</li>
+				<li>After this, you will be prompted to download your results and send them to the Tone Nation group.</li>
+				<li>That's it, easy peasy!</li>
+			</ol>
+		</div>
+	</fieldset>
+	<fieldset>
+		<legend>Practice Phrases</legend>
+		<ul id="modelAudioList-training"></ul>
+	</fieldset>
+	<fieldset id="download-box" style="display: none;">
+		<legend>Download Results</legend>
+		<p>
+			Congratulations, you have now completed this experiment!<br/>
+			Please download your results data and email them to <a href="mailto:apriltan@iastate.edu">apriltan@iastate.edu</a>.
+		</p>
+		<button onclick="downloadData()">Download Results</button>
+		<p>
+			For more practice, visit <a href="../index.html">here</a>.
+		</p>
+	</fieldset>
+	<script>
+		let allTrialsCompleted = fillTrainingList();
+		if (allTrialsCompleted) {
+			document.getElementById('download-box').style.display = "";
+	}
+	</script>
+</body>

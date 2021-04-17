@@ -3,29 +3,28 @@
 <head>
 	<meta charset="utf-8">
 	<title>Tone Nation</title>
-	<script src="Chart.min.js"></script>
-	<script src="utils.js"></script>
-	<script src="yin.min.js"></script>
-	<script src="RawData.js" type="text/javascript"></script>
-	<script src="FrequencyData.js" type="text/javascript"></script>
-	<script src="AudioFileHelpers.js" type="text/javascript"></script>
-	<script src="PitchDetection.js" type="text/javascript"></script>
-	<script src="AudioRecorder.js" type="text/javascript"></script>
-	<script src="ModelSegment.js" type="text/javascript"></script>
-	<script src="Normalization.js" type="text/javascript"></script>
-	<script src="CorrelationMSE.js" type="text/javascript"></script>
-	<script src="SmoothingSpline.js" type="text/javascript"></script>
-	<script src="lz-string.min.js" type="text/javascript"></script>
-    <script src="SegmentFormat.js" type="text/javascript"></script>
-    <script src="Trial.js" type="text/javascript"></script>
-    <script src="DTW.js" type="text/javascript"></script>
-    <script src="AudioFileData.js" type="text/javascript"></script>
+	<script src="../Chart.min.js"></script>
+	<script src="../utils.js"></script>
+	<script src="../yin.min.js"></script>
+	<script src="../RawData.js" type="text/javascript"></script>
+	<script src="../FrequencyData.js" type="text/javascript"></script>
+	<script src="../AudioFileHelpers.js" type="text/javascript"></script>
+	<script src="../PitchDetection.js" type="text/javascript"></script>
+	<script src="../ModelSegment.js" type="text/javascript"></script>
+	<script src="../Normalization.js" type="text/javascript"></script>
+	<script src="../CorrelationMSE.js" type="text/javascript"></script>
+	<script src="../SmoothingSpline.js" type="text/javascript"></script>
+	<script src="../lz-string.min.js" type="text/javascript"></script>
+    <script src="../SegmentFormat.js" type="text/javascript"></script>
+    <script src="../Trial.js" type="text/javascript"></script>
+    <script src="../DTW.js" type="text/javascript"></script>
+    <script src="../AudioFileData.js" type="text/javascript"></script>
 </head>
 <body>
 	<h2>Results</h2>
 	<div>
 		<button onclick="document.location='index.html'">Home</button>
-		<button onclick="window.location='training.html'">Retry</button>
+		<button onclick="window.location='training.html'" disabled>Re-record<span id="progress-meter"> (?/3)</span></button>
 		<button id="playButtonModel">Listen</button>
 		<div class="container" style="width:45%;"></div>
 		<br>
@@ -163,20 +162,49 @@
 
 			const frequenciesUser = getFrequencies(rawUser);			
 			// let nm = trim(NormalizeArray(frequenciesModel.buffer)).map(value => value < 0 ? -1 : value);
-			const normalizedModelAndUser = normalizeFrequencyArray(frequenciesModel.buffer, frequenciesUser.buffer);
-			const normalizedModel = normalizedModelAndUser.normalized1;
-			const normalizedUser  = normalizedModelAndUser.normalized2;
-
+			let nm = trim(NormalizeArray(frequenciesModel.buffer));
+			// for(let i = 1; i < nm.length;i++){
+			// 	if(!isReal(nm[i])){
+			// 		nm[i] = nm[i - 1];
+			// 	}
+			// }
+			let nu = trim(NormalizeArray(frequenciesUser.buffer));
+			// for(let i = 1; i < nu.length;i++){
+			// 	if(!isReal(nu[i])){
+			// 		nu[i] = nu[i - 1];
+			// 	}
+			// }
+			nu = nu.length < nm.length ? NormalizeTime(nu, nm) : nu;
+			nm = nu.length < nm.length ? nm : NormalizeTime(nu, nm);
+			const normalizedModel = nm;
+			const normalizedUser  = nu;
 			for (let i = 0; i < normalizedModel.length || i < normalizedUser.length; ++i){
 				chart.data.labels[i] = i;
 			}
 			plotArray(normalizedModel, chart, "Model");
 			plotArray(normalizedUser,  chart, "User");
 
-			const coAndMSE = getCoAndMSE(normalizedModel, normalizedUser);
+			const SplineArrayModel = getSplineFromArray(normalizedModel, 0.01);
+			const smoothedModel = evaluateSplineArray(SplineArrayModel, 0, normalizedModel.length);
+			// plotArray(smoothedModel, chart, "ModelSmooth");
+			const SplineArrayUser = getSplineFromArray(normalizedUser, 0.01);
+			const smoothedUser = evaluateSplineArray(SplineArrayUser, 0, normalizedUser.length);
+			// plotArray(smoothedUser, chart, "UserSmooth");
 
-			attemptCreateTrial(coAndMSE.co, coAndMSE.mse, "trials");
+			/** @type {number} */
+			const co = correlationCoe(smoothedUser, smoothedModel);
+			const mse = MSE(smoothedModel, smoothedUser);
 
+			attemptCreateTrial(co, mse, "training");
+
+			const trials = getTrials("training");
+			const modelAudioTrials = trials.filter(trial => trial.modelLabel === modelAudioData.label);
+			const MAX_ATTEMPTS_PER_MODEL = 3;
+			const progressMeter = document.getElementById('progress-meter');
+			progressMeter.textContent = " (" + modelAudioTrials.length + "/" + MAX_ATTEMPTS_PER_MODEL + ")"
+			if (modelAudioTrials.length < MAX_ATTEMPTS_PER_MODEL) {
+				progressMeter.parentNode.disabled = false;
+			}
 
 			console.log(co, mse);
 		};
