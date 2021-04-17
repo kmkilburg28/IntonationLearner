@@ -5,7 +5,7 @@ const modelLabels = [
 	"C",
 	"F"
 ];
-const MAX_ATTEMPTS_PER_MODEL = 1;
+const MAX_ATTEMPTS_PER_MODEL = 3;
 
 
 function fillTrainingList() {
