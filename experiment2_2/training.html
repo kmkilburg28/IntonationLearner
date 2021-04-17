@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Tone Nation</title>
+	<script src="../Chart.min.js"></script>
+	<script src="../utils.js"></script>
+	<script src="../yin.min.js"></script>
+	<script src="../RawData.js" type="text/javascript"></script>
+	<script src="../FrequencyData.js" type="text/javascript"></script>
+	<script src="../AudioFileHelpers.js" type="text/javascript"></script>
+	<script src="../PitchDetection.js" type="text/javascript"></script>
+	<script src="../AudioRecorder.js" type="text/javascript"></script>
+	<script src="../ModelSegment.js" type="text/javascript"></script>
+	<script src="../SmoothingSpline.js" type="text/javascript"></script>
+	<script src="../lz-string.min.js" type="text/javascript"></script>
+    <script src="../SegmentFormat.js" type="text/javascript"></script>
+    <script src="../AudioFileData.js" type="text/javascript"></script>
+    <script src="../Trial.js" type="text/javascript"></script>
+	<script src="training.js" type="text/javascript"></script>
+</head>
+<body>
+	<h2 style="display: inline-block;">Training: <u id="model-text"></u></h2>
+	<div>
+		<button onclick="document.location='index.html'">Home</button>
+		<button id="listenButton">Listen</button>
+		<div class="container" style="width:45%;"></div>
+		<br>
+		<div>
+			
+			<button id="audioControl">Record</button>
+		</div>
+
+	</div>
+	<script type="text/javascript">
+		function createConfig() {
+			return {
+				type: 'line',
+				data: {
+					labels: [],
+					datasets: [{
+						label: 'Model',
+						backgroundColor: window.chartColors.red,
+						borderColor: window.chartColors.red,
+						data: [],
+						fill: false,
+						pointRadius: 2,
+						pointHoverRadius: 15,
+						showLine: false // no line shown
+					}, {
+						label: 'User',
+						backgroundColor: window.chartColors.blue,
+						borderColor: window.chartColors.blue,
+						data: [],
+						fill: false,
+						pointRadius: 2,
+						pointHoverRadius: 15,
+						showLine: false // no line shown
+					}]
+				},
+				options: {
+					responsive: true,
+					title: {
+						display: true,
+						text: 'Frequency Graph'
+					},
+					legend: {
+						position: 'right',
+						labels: {
+							boxWidth: 20,
+						},
+						// display: false
+					},
+					elements: {
+						point: {
+							pointStyle: 'circle'
+						}
+					},
+					scales: {
+						yAxes: [{
+							ticks: {
+								min: 500.0,
+								max: 40.0
+							}
+						}],
+					},
+					// animation: {
+					// 	duration: 10,
+					// 	easing: 'linear'
+					// }
+					animation: undefined
+				}
+			};
+		}
+		const YIN_THRESHOLD_USER = 0.07;
+		const YIN_THRESHOLD_MODEL = 0.2;
+
+		window.onload = async function() {
+			const container = document.querySelector('.container');
+
+			let div = document.createElement('div');
+			div.classList.add('chart-container');
+
+			let canvas = document.createElement('canvas');
+			div.appendChild(canvas);
+			container.appendChild(div);
+
+			let ctx = canvas.getContext('2d');
+			let config = createConfig();
+			const chart = new Chart(ctx, config);
+
+			const modelAudioData = getPageModelAudioData();
+			document.getElementById('model-text').textContent = modelAudioData.text;
+
+			const trials = getTrials("training");
+			const modelAudioTrials = trials.filter(trial => trial.modelLabel === modelAudioData.label);
+			const MAX_ATTEMPTS_PER_MODEL = 3;
+			if (modelAudioTrials.length >= MAX_ATTEMPTS_PER_MODEL) {
+				document.location = 'index.html';
+			}
+
+			const audioBuffer = await loadAudioFile(modelAudioData.location);
+			const parsedAudio = parseAudioBuffer(audioBuffer);
+			const frequencies = getFrequencies(parsedAudio);
+
+			const listenButton = document.getElementById('listenButton');
+			listenButton.addEventListener('click', () => playAudioBuffer(audioBuffer));
+
+			plotArray(frequencies.buffer, chart, "Model");
+			chart.data.datasets.map(dataset => {
+				if (dataset.label == "User")
+					dataset.data = (new Array(frequencies.buffer.length)).fill(0);
+			});
+			// const SplineArray = getSplineFromArray(frequencies.buffer);
+			// plotSpline(SplineArray, chart, "ModelSmooth");
+			
+			let audioControl = document.getElementById("audioControl");
+			audioControl.chart = chart;
+			audioControl.addEventListener("click", recordAudio);
+		};
+	</script>
+	
+
+</body>
+</html>

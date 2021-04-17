@@ -31,7 +31,7 @@ class Trial {
  * @return {Trail[]}
  */
 function getTrials(trialsGroup) {
-	return getTrailsFromString(localStorage.getItem(trialsGroup));
+	return getTrailsFromString(localStorage.getItem("trials-" + trialsGroup));
 }
 
 /**
@@ -68,7 +68,7 @@ function attemptCreateTrial(co, mse, trialsGroup) {
 	}
 	let newTrial = new Trial(id, maxPrevModelId+1, modelLabel, co, mse);
 	trials.push(newTrial);
-	localStorage.setItem(trialsGroup, JSON.stringify(trials));
+	localStorage.setItem("trials-" + trialsGroup, JSON.stringify(trials));
 
 	return newTrial;
 }

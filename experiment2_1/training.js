@@ -42,12 +42,16 @@ async function recordAudio(e) {
 
 	let nextWindowStart = 0;
 
+	let stopFunction = () => {};
+
 	const audioRecorder = new AudioRecorder({
 		onAudioStart: () => {
 			audioControl.removeEventListener('click', recordAudio);
-			audioControl.addEventListener('click', () => {
+			stopFunction = () => {
 				audioRecorder.stop();
-			});
+				audioRecorder.removeEventListener('click', stopFunction);
+			};
+			audioControl.addEventListener('click', stopFunction);
 			audioControl.textContent = "Stop Recording";
 		},
 		onDataAvailable: (audioBlob) => {
@@ -131,7 +135,8 @@ async function recordAudio(e) {
 		},
 		onAudioStop: (audioBlob) => {
 			audioControl.textContent = "Reset";
-			audioControl.addEventListener('click', window.location.reload);
+			// audioControl.removeEventListener('click', stopFunction);
+			audioControl.addEventListener('click', () => document.location.reload());
 			let continueButton = document.getElementById("continueButton");
 			if (!continueButton) {
 				continueButton = document.createElement("button");
@@ -193,25 +198,16 @@ async function recordAudioTest(e) {
 			audioControl.removeEventListener('click', recordAudioTest);
 			stopFunction = () => {
 				audioRecorder.stop();
+				audioControl.removeEventListener('click', stopFunction);
 			};
 			audioControl.addEventListener('click', stopFunction);
 			audioControl.textContent = audioControl.textContent.split(':')[0] + ": Stop Recording";
 		},
-		onAudioStop: (audioBlob) => {
+		onAudioStop: async (audioBlob) => {
 			audioControl.textContent = "Reset";
-			audioControl.removeEventListener('click', stopFunction);
 			audioControl.addEventListener('click', () => document.location.reload());
 			const modelAudioData = audioControl.modelAudioData;
 
-			let frequenciesModel = undefined;
-			(async () => {
-				const audioBuffer = await loadAudioFile(modelAudioData.location);
-				const rawData = parseAudioBuffer(audioBuffer);
-				const frequenciesModel = getFrequencies(rawData);
-				return frequenciesModel;
-			})().then(frequenciesModelRet => {
-				frequenciesModel = frequenciesModelRet;
-			});
 			let frequenciesUser = undefined;
 			let fileReader = new FileReader();
 			fileReader.onloadend = () => {
@@ -222,6 +218,12 @@ async function recordAudioTest(e) {
 				});
 			}
 			fileReader.readAsArrayBuffer(audioBlob);
+			let frequenciesModel = await (async () => {
+				const audioBuffer = await loadAudioFile(modelAudioData.location);
+				const rawData = parseAudioBuffer(audioBuffer);
+				const frequenciesModel = getFrequencies(rawData);
+				return frequenciesModel;
+			})();
 
 
 			let submitButton = document.getElementById(audioControl.id + "-submitButton");
@@ -231,6 +233,8 @@ async function recordAudioTest(e) {
 				submitButton.textContent = "Submit";
 				submitButton.addEventListener('click', () => {
 					submitButton.disabled = true;
+					if (frequenciesModel == undefined || frequenciesUser == undefined)
+						return;
 					let lastTrialId = localStorage.getItem('lastTrialId');
 					if (lastTrialId == null)
 						lastTrialId = 0;

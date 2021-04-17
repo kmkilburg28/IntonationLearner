@@ -160,42 +160,18 @@
 				source.start(0);
 			});
 
-			const frequenciesUser = getFrequencies(rawUser);			
-			// let nm = trim(NormalizeArray(frequenciesModel.buffer)).map(value => value < 0 ? -1 : value);
-			let nm = trim(NormalizeArray(frequenciesModel.buffer));
-			// for(let i = 1; i < nm.length;i++){
-			// 	if(!isReal(nm[i])){
-			// 		nm[i] = nm[i - 1];
-			// 	}
-			// }
-			let nu = trim(NormalizeArray(frequenciesUser.buffer));
-			// for(let i = 1; i < nu.length;i++){
-			// 	if(!isReal(nu[i])){
-			// 		nu[i] = nu[i - 1];
-			// 	}
-			// }
-			nu = nu.length < nm.length ? NormalizeTime(nu, nm) : nu;
-			nm = nu.length < nm.length ? nm : NormalizeTime(nu, nm);
-			const normalizedModel = nm;
-			const normalizedUser  = nu;
-			for (let i = 0; i < normalizedModel.length || i < normalizedUser.length; ++i){
+			const frequenciesUser = getFrequencies(rawUser);
+			const normalizedModelAndUser = normalizeFrequencyArray(frequenciesModel.buffer, frequenciesUser.buffer);
+
+			for (let i = 0; i < normalizedModelAndUser.normalized1.length || i < normalizedModelAndUser.normalized2.length; ++i){
 				chart.data.labels[i] = i;
 			}
-			plotArray(normalizedModel, chart, "Model");
-			plotArray(normalizedUser,  chart, "User");
+			plotArray(normalizedModelAndUser.normalized1, chart, "Model");
+			plotArray(normalizedModelAndUser.normalized2,  chart, "User");
 
-			const SplineArrayModel = getSplineFromArray(normalizedModel, 0.01);
-			const smoothedModel = evaluateSplineArray(SplineArrayModel, 0, normalizedModel.length);
-			// plotArray(smoothedModel, chart, "ModelSmooth");
-			const SplineArrayUser = getSplineFromArray(normalizedUser, 0.01);
-			const smoothedUser = evaluateSplineArray(SplineArrayUser, 0, normalizedUser.length);
-			// plotArray(smoothedUser, chart, "UserSmooth");
+			const coAndMSE = getCoAndMSE(normalizedModelAndUser.normalized1, normalizedModelAndUser.normalized2);		
 
-			/** @type {number} */
-			const co = correlationCoe(smoothedUser, smoothedModel);
-			const mse = MSE(smoothedModel, smoothedUser);
-
-			attemptCreateTrial(co, mse, "training");
+			attemptCreateTrial(coAndMSE.co, coAndMSE.mse, "training");
 
 			const trials = getTrials("training");
 			const modelAudioTrials = trials.filter(trial => trial.modelLabel === modelAudioData.label);
@@ -206,7 +182,7 @@
 				progressMeter.parentNode.disabled = false;
 			}
 
-			console.log(co, mse);
+			console.log(coAndMSE.co, coAndMSE.mse);
 		};
 	</script>
 	

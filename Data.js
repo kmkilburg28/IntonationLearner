@@ -2,23 +2,11 @@
  * @param {string} trialsGroup 
  */
 function downloadData() {
-	let trialsPreTest = localStorage.getItem("trials-pretest");
-	if (trialsPreTest == null) {
-		trialsPreTest = "[]";
-	}
-	let trialsTraining = localStorage.getItem("trials-training");
-	if (trialsTraining == null) {
-		trialsTraining = "[]";
-	}
-	let trialsPostTest = localStorage.getItem("trials-posttest");
-	if (trialsPostTest == null) {
-		trialsPostTest = "[]";
-	}
 	console.log(localStorage)
 	let downloadText = JSON.stringify({
-		pretest:  JSON.parse(trialsPreTest),
-		training: JSON.parse(trialsTraining),
-		posttest: JSON.parse(trialsPostTest),
+		pretest:  getTrials("pretest"),
+		training: getTrials("training"),
+		posttest: getTrials("posttest"),
 	})
 	alert('Thank you for demoing Tone Nation.');
 	download("ToneNation_UserData.txt", downloadText);

@@ -5,7 +5,7 @@ const modelLabels = [
 	"C",
 	"F"
 ];
-const MAX_ATTEMPTS_PER_MODEL = 3;
+const MAX_ATTEMPTS_PER_MODEL = 1;
 
 
 function fillTrainingList() {
@@ -45,7 +45,7 @@ function fillTrainingList() {
 function fillTestBox(testType) {
 	const modelAudioDatasGroup = modelAudioDatas.filter(modelAudioData => modelLabels.includes(modelAudioData.label));
 
-	const trials = getTrials("trials-" + testType);
+	const trials = getTrials(testType);
 	const listDom = document.getElementById("modelAudioList-" + testType);
 	listDom.parentNode.style.display = "";
 	let allTrialsCompleted = true;
@@ -84,7 +84,7 @@ function fillTestBox(testType) {
 		else {
 			allTrialsCompleted = false;
 		}
-		recordButton.trialGroup = "trials-" + testType;
+		recordButton.trialGroup = testType;
 		recordButton.modelAudioData = modelAudioData;
 		recordButton.addEventListener('click', recordAudioTest);
 		controlsDiv.appendChild(recordButton);

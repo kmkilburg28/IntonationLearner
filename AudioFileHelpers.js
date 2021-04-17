@@ -15,8 +15,15 @@ async function loadAudioFile(src) {
 			}
 			else {
 				console.error(request.response);
+				alert("Error loading file! Refreshing to try again.");
+				document.location.reload();
 				reject(reject.response);
 			}
+		};
+		request.onerror = () => {
+			console.error(request.response);
+				alert("Please check your internet connection.\nError loading file from \n" + src + "\nRefreshing to try again.");
+				document.location.reload();
 		};
 		request.send();
 	});

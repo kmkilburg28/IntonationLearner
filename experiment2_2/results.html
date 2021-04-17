@@ -166,12 +166,12 @@
 			for (let i = 0; i < normalizedModelAndUser.normalized1.length || i < normalizedModelAndUser.normalized2.length; ++i){
 				chart.data.labels[i] = i;
 			}
-			plotArray(normalizedModel, chart, "Model");
-			plotArray(normalizedUser,  chart, "User");
+			plotArray(normalizedModelAndUser.normalized1, chart, "Model");
+			plotArray(normalizedModelAndUser.normalized2,  chart, "User");
 
 			const coAndMSE = getCoAndMSE(normalizedModelAndUser.normalized1, normalizedModelAndUser.normalized2);
 
-			attemptCreateTrial(co, mse, "training");
+			attemptCreateTrial(coAndMSE.co, coAndMSE.mse, "training");
 
 			const trials = getTrials("training");
 			const modelAudioTrials = trials.filter(trial => trial.modelLabel === modelAudioData.label);
@@ -182,7 +182,7 @@
 				progressMeter.parentNode.disabled = false;
 			}
 
-			console.log(co, mse);
+			console.log(coAndMSE.co, coAndMSE.mse);
 		};
 	</script>
 	
