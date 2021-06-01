@@ -38,6 +38,7 @@ function getFrequencies(rawData, WINDOW_SIZE=2048, OVERLAP=2048-256, YIN_THRESHO
  * @returns {Float32Array}
  */
 function cleanFrequencies(frequencies) {
+	// return frequencies;
 	// Remove extremes
 	const JUMP_THRESHOLD = 100;
 	const JUMP_TIME_LIMIT = 10;

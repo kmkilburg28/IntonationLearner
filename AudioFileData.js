@@ -42,5 +42,19 @@ function getPageModelAudioData() {
 		console.error("No model label found in local storage.");
 		return false;
 	}
+	else if (modelLabel == 'modelUpload') {
+		return getUploadModelAudioData();
+	}
 	return modelAudioDatas.find(modelAudioFile => modelAudioFile.label == modelLabel);
+}
+
+/**
+ * @return {AudioFileData}
+ */
+function getUploadModelAudioData() {
+	return new AudioFileData(
+		"Custom Upload",
+		"Custom Upload",
+		"modelUpload"
+	);
 }

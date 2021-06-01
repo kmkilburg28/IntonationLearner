@@ -12,7 +12,7 @@
 	<fieldset>
 		<h2>Are you sure you want to erase your results?</h2>
 		<button onclick="window.location = 'index.html'">No</button>
-		<button onclick="localStorage.clear(); alert('Data was successfully erased!'); document.location='index.html'" style="background-color:lightcoral;">Yes</button>
+		<button onclick="localStorage.clear(); window.indexedDB.deleteDatabase('IntonationLearner'); alert('Data was successfully erased!'); document.location='index.html'" style="background-color:lightcoral;">Yes</button>
     </fieldset>
 </body>
 </html>

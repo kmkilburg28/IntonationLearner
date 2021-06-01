@@ -111,6 +111,7 @@
 			const modelAudioData = getPageModelAudioData();
 
 			const audioBuffer = await loadAudioFile(modelAudioData.location);
+			console.log(audioBuffer);
 			const parsedAudio = parseAudioBuffer(audioBuffer);
 			const frequencies = getFrequencies(parsedAudio);
 

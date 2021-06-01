@@ -3,6 +3,9 @@
  * @returns {Promise<AudioBuffer|undefined>}
  */
 async function loadAudioFile(src) {
+	if (src == "modelUpload") {
+		return retrieveRawAudio("modelUpload");
+	}
 	return new Promise(async (resolve, reject) => {
 		const request = new XMLHttpRequest();
 		request.open("GET", src);
@@ -33,11 +36,129 @@ async function loadAudioFile(src) {
 	});
 }
 
+// /**
+//  * @param {string} src
+//  * @returns {AudioBuffer}
+//  */
+// function retrieveRawAudio(src) {
+// 	return stringToRawData(LZString.decompress(localStorage.getItem(src)));
+// }
 /**
- * @param {AudioBuffer} audioBuffer 
+ * @param {string} src
+ * @returns {AudioBuffer}
+ */
+function retrieveRawAudio(src) {
+	return new Promise(async (resolve, reject) => {
+
+		const objectStoreKey = "CompressedAudioFiles";
+		const objectStore = await initializeTransaction(objectStoreKey, "readonly", src);
+		if (!objectStore) {
+			reject(objectStore);
+		}
+
+		const requestRead = objectStore.get(src);
+
+		requestRead.onerror = () => {
+			alert("Audio file failed to upload. Please try again with a shorter audio clip.");
+			reject(false);
+		}
+		requestRead.onsuccess = (e) => {
+			console.log(e);
+			let audioBuffer = stringToRawData(LZString.decompress(e.target.result.data));
+			resolve(audioBuffer);
+		};
+	});
+}
+/**
+ * @param {string} src
+ * @param {RawData} rawData
+ * @returns {Promise<boolean>}
+ */
+function storeRawAudio(src, rawData) {
+	return new Promise(async (resolve, reject) => {
+
+		const objectStoreKey = "CompressedAudioFiles";
+		const objectStore = await initializeTransaction(objectStoreKey, "readwrite", src);
+		if (!objectStore) {
+			reject(objectStore);
+		}
+
+		const entry = {
+			"label" : src,
+			"data" : LZString.compress(JSON.stringify(rawData))
+		};
+
+		const requestWrite = objectStore.put(entry);
+		requestWrite.onerror = () => {
+			alert("Audio file failed to upload. Please try again with a shorter audio clip.");
+			reject(false);
+		}
+		requestWrite.onsuccess = () => {
+			// I'm not sure why this extra check is required, I assume its a timing thing as it is only necessary for a browser's first upload.
+			// Otherwise, it says the db entry doesn't exist when 'retrieveRawAudio' is called on a separate page
+			retrieveRawAudio(src).then((rawDataCheck) => {
+				if (rawDataCheck)
+					resolve(true);
+				else {
+					console.error("Database entry was supposedly successfully, but the entry is not found.")
+					reject(false);
+				}
+			})
+		};
+	});
+}
+
+/**
+ * @param {string} objectStoreKey 
+ * @param {string} mode 
+ * @returns {Promise<IDBObjectStore | false>}
+ */
+async function initializeTransaction(objectStoreKey, mode, label) {
+	return new Promise(async (resolve, reject) => {
+		const request = window.indexedDB.open("IntonationLearner");
+
+		request.onerror = (e) => {
+			console.error(e.target);
+			reject(false);
+		};
+
+		request.onupgradeneeded = (e) => {
+			const db = e.target.result;
+			const objectStore = db.createObjectStore(objectStoreKey, { keyPath: "label" });
+			objectStore.oncomplete = () => {
+				objectStore.add({'label': label, 'data': undefined});
+			};
+		};
+		request.onsuccess = (e) => {
+			const db = e.target.result;
+			const transaction = db.transaction([objectStoreKey], mode);
+			
+			transaction.onerror = () => {
+				alert("Transaction error for IndexedDB");
+				reject(false);
+			};
+
+
+			resolve(transaction.objectStore(objectStoreKey));
+		};
+	});
+
+}
+
+/**
+ * @param {AudioBuffer | RawData} audioBuffer 
  * @param {number} volume 
  */
 function playAudioBuffer(audioBuffer, volume=1) {
+	if (audioBuffer instanceof RawData) {
+		const buffer = audioBuffer.buffer;
+		audioBuffer = audioContext.createBuffer(
+			1,
+			audioBuffer.buffer.length,
+			audioBuffer.sampleRate
+		);
+		audioBuffer.getChannelData(0).set(buffer);
+	}
 	const source = audioContext.createBufferSource();
 	source.buffer = audioBuffer;
 	const gainNode = audioContext.createGain();
@@ -48,10 +169,11 @@ function playAudioBuffer(audioBuffer, volume=1) {
 }
 
 /**
- * @param {AudioBuffer} audioBuffer 
+ * @param {AudioBuffer | RawData} audioBuffer 
  * @returns {RawData}
  */
 function parseAudioBuffer(audioBuffer) {
+	if (audioBuffer instanceof RawData) return audioBuffer;
 	// Grab averaged data
 	const averagedChannelData = new Float32Array(audioBuffer.length);
 	const numChannels = audioBuffer.numberOfChannels
@@ -90,6 +212,7 @@ function stringToRawData(rawDataString) {
  function plotArray(array, chart, datasetLabel) {
 	chart.data.datasets.forEach((dataset) => {
 		if (dataset.label == datasetLabel) {
+			console.log("plotting")
 			dataset.data = new array.constructor(array.length);
 			for (let i = 0; i < array.length; ++i) {
 				dataset.data[i] = array[i];

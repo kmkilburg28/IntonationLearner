@@ -153,14 +153,12 @@ async function recordAudio(e) {
 				let arrayBuffer = fileReader.result;
 				audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
 					let rawData = parseAudioBuffer(audioBuffer);
-					localStorage.removeItem("userRecording");
-					try {
-						localStorage.setItem("userRecording", LZString.compress(JSON.stringify(rawData)));
-					}
-					catch (e) {
-						alert("Audio recording was too long. Please reset and try again.");
-						continueButton.disabled = true;
-					}
+
+					storeRawAudio("userRecording", rawData).then((success) => {
+						if (!success) {
+							continueButton.disabled = true;
+						}
+					});
 				});
 			}
 			fileReader.readAsArrayBuffer(audioBlob);

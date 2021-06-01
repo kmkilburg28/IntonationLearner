@@ -53,15 +53,15 @@
 						pointRadius: 2,
 						pointHoverRadius: 15,
 						showLine: false // no line shown
-					// }, {
-					// 	label: 'ModelSmooth',
-					// 	backgroundColor: window.chartColors.blue,
-					// 	borderColor: window.chartColors.blue,
-					// 	data: [],
-					// 	fill: false,
-					// 	pointRadius: 2,
-					// 	pointHoverRadius: 15,
-					// 	showLine: false // no line shown
+					}, {
+						label: 'ModelSmooth',
+						backgroundColor: window.chartColors.orange,
+						borderColor: window.chartColors.orange,
+						data: [],
+						fill: false,
+						pointRadius: 2,
+						pointHoverRadius: 15,
+						showLine: false // no line shown
 					}, {
 						label: 'User',
 						backgroundColor: window.chartColors.blue,
@@ -71,15 +71,15 @@
 						pointRadius: 2,
 						pointHoverRadius: 15,
 						showLine: false // no line shown
-					// }, {
-					// 	label: 'UserSmooth',
-					// 	backgroundColor: window.chartColors.green,
-					// 	borderColor: window.chartColors.green,
-					// 	data: [],
-					// 	fill: false,
-					// 	pointRadius: 2,
-					// 	pointHoverRadius: 15,
-					// 	showLine: false // no line shown
+					}, {
+						label: 'UserSmooth',
+						backgroundColor: window.chartColors.green,
+						borderColor: window.chartColors.green,
+						data: [],
+						fill: false,
+						pointRadius: 2,
+						pointHoverRadius: 15,
+						showLine: false // no line shown
 					}]
 				},
 				options: {
@@ -142,23 +142,10 @@
 			listenButton.addEventListener('click', () => playAudioBuffer(audioBuffer));
 			
 
-			const rawUser = stringToRawData(LZString.decompress(localStorage.getItem("userRecording")));
+			const rawUser = await retrieveRawAudio("userRecording");
 			const playButtonUser = document.getElementById("playUser");
 			playButtonUser.addEventListener('click', () => {
-				const audioBuffer = audioContext.createBuffer(
-					1,
-					rawUser.buffer.length,
-					rawUser.sampleRate
-				);
-				audioBuffer.getChannelData(0).set(rawUser.buffer);
-				const source = audioContext.createBufferSource();
-				source.buffer = audioBuffer;
-				// const gainNode = audioContext.createGain();
-				// gainNode.gain.value = 1;
-				// source.connect(gainNode);
-				// gainNode.connect(audioContext.destination);
-				source.connect(audioContext.destination);
-				source.start(0);
+				playAudioBuffer(rawUser);
 			});
 
 			const frequenciesUser = getFrequencies(rawUser);			
@@ -172,6 +159,15 @@
 			}
 			plotArray(normalizedModel, chart, "Model");
 			plotArray(normalizedUser,  chart, "User");
+
+			const SplineArray1 = getSplineFromArray(normalizedModel, 0.01);
+			const smoothed1 = evaluateSplineArray(SplineArray1, 0, normalizedModel.length);
+
+			const SplineArray2 = getSplineFromArray(normalizedUser, 0.01);
+			const smoothed2 = evaluateSplineArray(SplineArray2, 0, normalizedUser.length);
+			console.log(smoothed1, smoothed2)
+			plotArray(smoothed1, chart, "ModelSmooth");
+			plotArray(smoothed2, chart, "UserSmooth");
 
 			const coAndMSE = getCoAndMSE(normalizedModel, normalizedUser);
 
